@@ -216,5 +216,3 @@ The local development setup is complete when:
 - [ ] External provider dependencies are controlled.
 - [ ] No credentials are committed to Git.
 - [ ] Common setup failures have documented troubleshooting steps.
-
-**Next document:** `docs/implementation/18-pre-implementation-review-and-sign-off.md` — perform a final consistency review of the planning documents, identify unresolved decisions that block development, and establish the formal criteria for beginning implementation.
