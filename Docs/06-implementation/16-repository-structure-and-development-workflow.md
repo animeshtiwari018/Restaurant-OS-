@@ -1,57 +1,60 @@
 # Repository Structure & Development Workflow
 
-**Project:** Restaurant Operating System  
-**Document ID:** IMPL-016  
-**Status:** Draft — Pending Review  
+**Project:** Restaurant Operating System
+**Document ID:** IMPL-016
+**Status:** Draft
 **Last Updated:** 2026-10-13
+
+---
 
 ## 1. Purpose
 
-Define the repository structure, module boundaries, development conventions, environment configuration, and Git workflow for the Restaurant Operating System.
+Define the repository structure, module boundaries, development conventions, environment configuration, and Git workflow for this project.
 
-The repository must remain understandable for a solo developer while supporting reliable testing, independent module development, and future SaaS expansion.
+The repo must be manageable for a solo developer while supporting reliable testing, independent module development, and future SaaS expansion.
+
+---
 
 ## 2. Repository Strategy
 
-**Decision:** Use a single Git repository containing the frontend, backend, shared contracts, documentation, and database-related assets.
+**Decision:** Single Git repository containing frontend, backend, shared contracts, documentation, and database assets.
 
-This keeps development and version control straightforward while the application is maintained as a modular monolith.
+This keeps development and version control simple while the application is a modular monolith.
 
-Use separate frontend and backend applications within the repository, but do not introduce separate repositories or microservices without a concrete requirement.
+> Do NOT introduce separate repositories or microservices without a concrete requirement.
+
+---
 
 ## 3. Proposed Repository Structure
 
-```text
+```
 restaurant-os/
 ├── apps/
-│   ├── web/
+│   ├── web/                         # Next.js frontend
 │   │   ├── public/
-│   │   ├── src/
-│   │   │   ├── app/
-│   │   │   ├── components/
-│   │   │   ├── features/
-│   │   │   │   ├── menu/
-│   │   │   │   ├── ordering/
-│   │   │   │   ├── reservations/
-│   │   │   │   ├── tables/
-│   │   │   │   ├── kitchen/
-│   │   │   │   ├── billing/
-│   │   │   │   └── inventory/
-│   │   │   ├── lib/
-│   │   │   ├── hooks/
-│   │   │   └── styles/
-│   │   ├── tests/
-│   │   ├── next.config.ts
-│   │   └── package.json
+│   │   └── src/
+│   │       ├── app/                 # Routes, layouts, error boundaries
+│   │       ├── components/          # Reusable UI components
+│   │       ├── features/            # Feature-specific UI and logic
+│   │       │   ├── menu/
+│   │       │   ├── ordering/
+│   │       │   ├── reservations/
+│   │       │   ├── tables/
+│   │       │   ├── kitchen/
+│   │       │   ├── billing/
+│   │       │   └── inventory/
+│   │       ├── lib/                 # API clients, utilities, helpers
+│   │       ├── hooks/
+│   │       └── styles/
 │   │
-│   └── api/
+│   └── api/                         # Express backend
 │       ├── src/
 │       │   ├── app.ts
 │       │   ├── server.ts
 │       │   ├── config/
 │       │   ├── middleware/
 │       │   ├── common/
-│       │   ├── modules/
+│       │   ├── modules/             # Business domain modules
 │       │   │   ├── auth/
 │       │   │   ├── restaurants/
 │       │   │   ├── menu/
@@ -75,11 +78,9 @@ restaurant-os/
 │       └── package.json
 │
 ├── packages/
-│   └── contracts/
-│       ├── src/
-│       └── package.json
+│   └── contracts/                   # Shared API schemas and types
 │
-├── docs/
+├── docs/                            # Planning and specification documents
 │   ├── requirements/
 │   ├── architecture/
 │   ├── database/
@@ -88,73 +89,64 @@ restaurant-os/
 │   └── implementation/
 │
 ├── tests/
-│   └── e2e/
+│   └── e2e/                         # End-to-end tests
 │
 ├── .github/
-│   └── workflows/
-├── .env.example
+│   └── workflows/                   # CI/CD automation
+├── .env.example                     # Placeholder env file (no real secrets)
 ├── .gitignore
 ├── package.json
-├── package-lock.json
 └── README.md
 ```
 
-This is the proposed target structure, not a requirement to create every directory immediately. Add module folders as the corresponding features are implemented.
+> This is the proposed target structure. Add module folders as features are implemented — don't create everything upfront.
+
+---
 
 ## 4. Frontend Organization
 
-The frontend uses Next.js with TypeScript.
-
 ### `app/`
-
-Contains routes, layouts, loading states, error boundaries, and route-level composition.
+Routes, layouts, loading states, error boundaries, and route-level composition.
 
 ### `components/`
-
-Contains reusable presentation components that are not specific to one business module.
-
-Examples include buttons, dialogs, form controls, data tables, status badges, and loading indicators.
+Reusable UI components not specific to any one business module.
+Examples: buttons, dialogs, form controls, data tables, status badges, loading indicators.
 
 ### `features/`
-
-Contains feature-specific UI, hooks, forms, and presentation logic.
-
-A feature may contain its own components when those components are not genuinely reusable elsewhere.
+Feature-specific UI, hooks, forms, and presentation logic.
+A feature may have its own components if they are not genuinely reusable elsewhere.
 
 ### `lib/`
+Shared infrastructure: API clients, formatting utilities, non-visual helpers.
 
-Contains shared infrastructure such as API clients, formatting utilities, and non-visual helpers.
+### Frontend Rules
+- Business-critical rules stay on the backend, not the frontend
+- Treat all client-provided prices, totals, roles, and resource IDs as untrusted
+- Don't duplicate the same UI logic across different ordering modes
+- Provide consistent loading, empty, error, and conflict states
+- Never put secrets in client-side environment variables
 
-### Frontend rules
-
-- Keep business-critical rules on the backend.
-- Treat all client-provided prices, totals, roles, and resource identifiers as untrusted input.
-- Avoid duplicating the same UI logic across ordering modes.
-- Provide consistent loading, empty, error, and conflict states.
-- Do not place secrets in client-side environment variables.
-- Use server-side rendering and client-side interaction according to actual page requirements rather than forcing every component into one rendering mode.
+---
 
 ## 5. Backend Module Organization
 
-Each backend module should have a clear responsibility and a consistent internal structure.
+Each module has a clear responsibility and consistent internal structure.
 
-Example:
-
-```text
-modules/
-└── orders/
-    ├── orders.routes.ts
-    ├── orders.controller.ts
-    ├── orders.service.ts
-    ├── orders.repository.ts
-    ├── orders.schemas.ts
-    ├── orders.types.ts
-    └── orders.test.ts
+### Example Module Structure
+```
+modules/orders/
+├── orders.routes.ts       # Endpoints and middleware
+├── orders.controller.ts   # HTTP request/response translation
+├── orders.service.ts      # Use cases and business operations
+├── orders.repository.ts   # Database access
+├── orders.schemas.ts      # Request validation (Zod)
+├── orders.types.ts        # TypeScript types
+└── orders.test.ts         # Tests
 ```
 
-Not every module needs every file. Small modules should remain small.
+Small modules should remain small — not every file is needed in every module.
 
-### Responsibilities
+### Layer Responsibilities
 
 | Layer | Responsibility |
 |---|---|
@@ -166,15 +158,16 @@ Not every module needs every file. Small modules should remain small.
 | Schemas | Validate incoming requests |
 | Tests | Verify behavior and invariants |
 
-### Backend rules
+### Backend Rules
+- Controllers must NOT contain complex business logic
+- Business rules must NOT depend on HTTP request objects
+- Database access must follow defined module boundaries
+- Related database mutations must use explicit transaction boundaries
+- External provider calls must NOT occur inside long-running database transactions
+- Modules must NOT import another module's internal files arbitrarily
+- All errors must flow through the application's consistent error-handling mechanism
 
-- Controllers must not contain complex business logic.
-- Business rules must not depend on HTTP request objects.
-- Database access must follow defined module boundaries.
-- Related database mutations must use explicit transaction boundaries.
-- External provider calls must not occur inside long-running database transactions.
-- Modules must not import another module's internal files arbitrarily.
-- All errors must flow through the application's consistent error-handling mechanism.
+---
 
 ## 6. Module Ownership
 
@@ -192,36 +185,37 @@ Not every module needs every file. Small modules should remain small.
 | Inventory | Ingredients, stock movements, stock balances |
 | Reports | Read-only reporting and aggregation |
 
-A module may request an operation from another module through an explicit service interface. It must not directly manipulate another module's records to bypass that module's business rules.
+> A module can request an operation from another module through an explicit service interface. It must NOT directly manipulate another module's records.
 
-## 7. Shared Contracts
+---
 
-The `packages/contracts/` package contains shared API-related schemas and types when sharing them is useful and does not introduce inappropriate coupling.
+## 7. Shared Contracts (`packages/contracts/`)
+
+Contains shared API-related schemas and types that both frontend and backend need.
 
 Examples:
-
-- Request and response schemas.
-- Shared API error structures.
-- Enumerations exposed through the API.
-- Common pagination metadata.
+- Request and response schemas
+- Shared API error structures
+- Enums exposed through the API
+- Common pagination metadata
 
 Rules:
+- Do NOT share database models directly with the frontend
+- Do NOT expose internal database fields just because they exist in Prisma
+- Avoid circular dependencies
+- Keep contracts independent of server-only libraries and secrets
+- Always validate requests on the backend even if the frontend uses the same schema
 
-- Do not share database models directly with the frontend.
-- Do not expose internal database fields simply because they exist in Prisma.
-- Avoid circular dependencies.
-- Keep contracts independent of server-only libraries and secrets.
-- Validate requests again on the backend even when the frontend uses the same schema.
+---
 
 ## 8. Environment Configuration
 
-Use separate environment configurations for local development, testing, staging, and production.
+Use separate environments for: local development, testing, staging, and production.
 
-The root `.env.example` should document required variable names without containing real credentials.
+The `.env.example` file documents required variable names — never real credentials.
 
-Typical variables may include:
-
-```text
+### Typical Environment Variables
+```
 NODE_ENV=
 PORT=
 DATABASE_URL=
@@ -233,32 +227,31 @@ PAYMENT_WEBHOOK_SECRET=
 OTP_PROVIDER_KEY=
 ```
 
-The exact variable names and required values must be finalized when the relevant providers and deployment environments are selected.
+### Environment Rules
+- Never commit populated `.env` files
+- Validate required environment variables at application startup
+- Fail clearly if required config is missing
+- Use separate credentials for dev, staging, and production
+- Keep payment and notification credentials server-side only
+- Use test/sandbox credentials for demo flows
+- Rotate compromised credentials immediately
 
-### Environment rules
-
-- Never commit populated environment files.
-- Validate required environment variables at application startup.
-- Fail clearly when required configuration is missing.
-- Use separate credentials for development, staging, and production.
-- Keep payment and notification credentials server-side.
-- Use test credentials for demonstration payment flows.
-- Rotate compromised credentials immediately.
+---
 
 ## 9. Git Workflow
 
-Use a simple branch strategy appropriate for a solo developer.
+Simple branch strategy suitable for a solo developer.
 
 ### Branches
+| Branch | Purpose |
+|---|---|
+| `main` | Stable, demonstrable application state |
+| `feat/<short-description>` | New functionality |
+| `fix/<short-description>` | Bug fixes |
+| `docs/<short-description>` | Documentation-only changes |
 
-- `main`: Stable, demonstrable application state.
-- `feat/<short-description>`: New functionality.
-- `fix/<short-description>`: Bug fixes.
-- `docs/<short-description>`: Documentation-only changes.
-
-Examples:
-
-```text
+### Examples
+```
 feat/menu-management
 feat/order-lifecycle
 feat/kitchen-display
@@ -266,25 +259,24 @@ fix/duplicate-order-submission
 docs/api-contract-review
 ```
 
-### Development sequence
+### Development Sequence
+1. Start from the latest stable `main`
+2. Create a branch for a focused change
+3. Implement the smallest coherent unit of work
+4. Run the relevant tests, linting, and type checks
+5. Review the diff for: unrelated changes, secrets, accidental data exposure
+6. Commit with a clear message
+7. Merge only after the change satisfies its acceptance criteria
 
-1. Start from the latest stable `main`.
-2. Create a branch for a focused change.
-3. Implement the smallest coherent unit of work.
-4. Run the relevant tests, linting, and type checks.
-5. Review the diff for unrelated changes, secrets, and accidental data exposure.
-6. Commit with a clear message.
-7. Merge only after the change satisfies its acceptance criteria.
+> For a solo project, pull requests are optional locally but useful for documenting significant changes.
 
-For a solo project, pull requests are optional locally but useful for documenting significant changes and preserving review discipline.
+---
 
 ## 10. Commit Conventions
 
 Use concise commit messages describing the change.
 
-Recommended format:
-
-```text
+```
 feat: add menu item management
 fix: prevent duplicate order creation
 test: cover reservation concurrency
@@ -293,62 +285,40 @@ refactor: isolate payment provider handling
 chore: configure automated checks
 ```
 
-A commit should represent a coherent change. Avoid mixing unrelated features, formatting changes, and large refactors in the same commit.
+A commit should represent a coherent change. Don't mix unrelated features, formatting changes, and large refactors in one commit.
+
+---
 
 ## 11. Code Quality Standards
 
-Every change must follow these standards:
+Every change must follow these:
 
-- TypeScript strict mode where practical.
-- Explicit request and response contracts.
-- Consistent error handling.
-- No hardcoded secrets.
-- No authoritative monetary calculations using floating-point arithmetic.
-- No unvalidated state transitions.
-- No unchecked cross-restaurant resource access.
-- Database migrations for schema changes.
-- Automated tests for critical business behavior.
-- Clear naming and limited unnecessary abstraction.
+- TypeScript strict mode where practical
+- Explicit request and response contracts
+- Consistent error handling
+- No hardcoded secrets
+- No floating-point arithmetic for monetary calculations
+- No unvalidated state transitions
+- No unchecked cross-restaurant resource access
+- Database migrations for all schema changes
+- Automated tests for critical business behavior
+- Clear naming, limited unnecessary abstraction
 
-Formatting and linting rules should be automated rather than enforced only through manual review.
+> Formatting and linting must be automated, not just enforced through manual review.
 
-## 12. Local Development Requirements
+---
 
-The development environment must provide:
-
-- A supported Node.js LTS release.
-- npm and a committed lockfile.
-- PostgreSQL.
-- Git.
-- A TypeScript-compatible editor.
-- Browser-based frontend testing.
-- Environment configuration for the frontend and API.
-
-The exact runtime versions must be pinned in the repository before implementation begins.
-
-The README must explain:
-
-1. Prerequisites.
-2. Repository installation.
-3. Environment setup.
-4. Database creation and migrations.
-5. Synthetic data seeding.
-6. Starting the frontend and API.
-7. Running tests and quality checks.
-8. Troubleshooting common setup errors.
-
-## 13. Repository Acceptance Criteria
+## 12. Repository Acceptance Criteria
 
 The repository foundation is complete when:
 
-- [ ] Frontend and backend have clear boundaries.
-- [ ] Backend modules have documented ownership.
-- [ ] Shared contracts do not expose internal database models.
-- [ ] Environment variables are validated.
-- [ ] No secrets are committed.
-- [ ] Database migrations are version-controlled.
-- [ ] Git conventions are documented.
-- [ ] Automated quality checks are available.
-- [ ] A clean local setup is reproducible from the README.
-- [ ] The structure supports the approved MVP without unnecessary infrastructure.
-
+- [ ] Frontend and backend have clear boundaries
+- [ ] Backend modules have documented ownership
+- [ ] Shared contracts do not expose internal database models
+- [ ] Environment variables are validated at startup
+- [ ] No secrets are committed to the repository
+- [ ] Database migrations are version-controlled
+- [ ] Git conventions are documented
+- [ ] Automated quality checks are available
+- [ ] A clean local setup is reproducible from the README
+- [ ] The structure supports the approved MVP without unnecessary infrastructure
