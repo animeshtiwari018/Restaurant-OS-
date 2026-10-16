@@ -1,0 +1,15 @@
+# Dependencies (subfolders ke bhi catch kar lega)
+node_modules/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Logs & OS junk
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+dist/
+build/
