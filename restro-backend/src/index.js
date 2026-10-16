@@ -1,10 +1,17 @@
 import dotenv from 'dotenv';
+import connectDB from './db/index.js';
 import app from './app.js';
 
-dotenv.config({ path: './.env' });
+// Load environment variables from .env
+dotenv.config();
 
 const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-    console.log(`⚙️ Server is running at http://localhost:${PORT}`);
-});
+connectDB()
+    .then(() => {
+        app.listen(PORT, () => {
+            console.log(`⚙️  Server is running at http://localhost:${PORT}`);
+        });
+    })
+    .catch((error) => {
+        console.error("❌ Database connection error, Server failed to start:", error);
+    });
