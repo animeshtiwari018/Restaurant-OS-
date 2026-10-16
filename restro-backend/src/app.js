@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import tableRouter from './routes/tableRoutes.js';
+import menuRouter from './routes/menu.routes.js';
 
 const app = express();
 
@@ -22,5 +23,6 @@ app.get('/health', (req, res) => {
 
 // Routes
 app.use('/api/v1/tables', tableRouter);
+app.use('/api/v1/menu', menuRouter);
 
 export default app;
