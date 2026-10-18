@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 
-const JWT_SECRET = process.env.QR_JWT_SECRET || 'fallback_secret_key';
+const JWT_SECRET = process.env.QR_JWT_SECRET || process.env.JWT_SECRET || 'fallback_secret_key';
 
 /**
  * Generate a cryptographically signed QR token bound to tableNumber, restaurantId, and branch HMAC signature
@@ -24,6 +24,21 @@ export const generateTableToken = (tableNumber, restaurantId = '6500000000000000
             scope: 'TABLE_ORDER' 
         }, 
         JWT_SECRET
+    );
+};
+
+/**
+ * Generate a signed Customer Session token bound to active table session
+ */
+export const generateSessionToken = (sessionId, tableNumber) => {
+    return jwt.sign(
+        {
+            sessionId: sessionId.toString(),
+            tableNumber,
+            scope: 'CUSTOMER_SESSION'
+        },
+        JWT_SECRET,
+        { expiresIn: '24h' }
     );
 };
 
@@ -75,3 +90,5 @@ export const verifyTableToken = (req, res, next) => {
         });
     }
 };
+
+export { JWT_SECRET };
