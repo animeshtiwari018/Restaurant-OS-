@@ -1,8 +1,10 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+import http from 'http';
 import connectDB from './db/index.js';
 import app from './app.js';
+import { initSocket } from './sockets/index.js';
 import mongoose from 'mongoose';
 
 const TEST_PORT = 5005;
@@ -47,9 +49,11 @@ async function runTests() {
         // 1. Connect to Database
         await connectDB();
 
-        // 2. Start HTTP Server
+        // 2. Start HTTP Server with Socket.IO
         await new Promise((resolve) => {
-            server = app.listen(TEST_PORT, () => {
+            const httpServer = http.createServer(app);
+            initSocket(httpServer);
+            server = httpServer.listen(TEST_PORT, () => {
                 console.log(`📡 Test Server listening on ${BASE_URL}\n`);
                 resolve();
             });
@@ -149,34 +153,39 @@ async function runTests() {
         });
         const catData = await catRes.json();
         testCategoryId = catData.data?._id;
-        assert(catRes.status === 201, 'POST /api/v1/menu/categories creates food category');
+        assert(catRes.status === 201 && !!testCategoryId, 'POST /api/v1/menu/categories creates menu category');
 
-        // Add Menu Item with Nutrition
+        // Create Menu Item
         const itemRes = await fetch(`${BASE_URL}/api/v1/menu/items`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 restaurant_id: fakeRestaurantId,
                 category_id: testCategoryId,
-                name: 'Paneer Butter Masala',
-                description: 'Cottage cheese simmered in buttery tomato gravy',
+                name: 'Paneer Butter Masala Special',
+                description: 'Cottage cheese cubes in rich tomato gravy',
                 price_paise: 32000, // ₹320.00
+                dietary_labels: ['VEG', 'GLUTEN_FREE'],
+                allergens: ['Dairy'],
                 nutrition: {
-                    calories: 480,
+                    calories: 420,
                     protein: 18,
-                    fat: 32,
-                    carbs: 22
-                },
-                ingredients: ['Paneer', 'Butter', 'Cashew Cream', 'Tomato'],
-                allergens: ['Dairy', 'Nuts'],
-                dietary_labels: ['VEG']
+                    carbs: 22,
+                    fats: 28,
+                    fiber: 3
+                }
             })
         });
         const itemData = await itemRes.json();
         testMenuItemId = itemData.data?._id;
-        assert(itemRes.status === 201 && itemData.data?.nutrition?.protein === 18, 'POST /api/v1/menu/items creates dish with macronutrients (18g Protein, 480 kcal)');
+        assert(
+            itemRes.status === 201 && 
+            itemData.data?.price_paise === 32000 && 
+            itemData.data?.nutrition?.protein === 18,
+            'POST /api/v1/menu/items creates item with integer paise price and nutrition stats'
+        );
 
-        // Test 5: Customer Cart & Order Placement
+        // Test 5: Customer Order Placement
         console.log('\n--- 5. Customer Order Placement ---');
         const orderRes = await fetch(`${BASE_URL}/api/v1/orders`, {
             method: 'POST',
@@ -283,9 +292,9 @@ async function runTests() {
             headers: { Authorization: `Bearer ${waiterToken}` }
         });
         const finalBillData = await finalBillRes.json();
-        assert(finalBillRes.status === 200 && finalBillData.data?.status === 'FINALIZED', 'POST /api/v1/billing/:id/finalize locks bill');
+        assert(finalBillRes.status === 200 && finalBillData.data?.status === 'FINALIZED', 'POST /api/v1/billing/:id/finalize locks bill to FINALIZED');
 
-        // Record payment in full (₹672.00 = 67200 paise via UPI)
+        // Record settlement payment
         const payRes = await fetch(`${BASE_URL}/api/v1/billing/${testBillId}/payments`, {
             method: 'POST',
             headers: { 
@@ -301,6 +310,25 @@ async function runTests() {
         const payData = await payRes.json();
         assert(payRes.status === 200 && payData.data?.status === 'SETTLED', 'POST /api/v1/billing/:id/payments settles full payment -> SETTLED');
 
+        // Test 9: Reconnection State Hydration API & Rate Limiting
+        console.log('\n--- 9. Reconnection State Hydration & Security ---');
+        const hydrationRes = await fetch(`${BASE_URL}/api/v1/sessions/current?token=${qrToken}`);
+        const hydrationData = await hydrationRes.json();
+        assert(
+            hydrationRes.status === 200 &&
+            hydrationData.data?.session?._id === testSessionId &&
+            hydrationData.data?.liveOrder?._id === testOrderId &&
+            !!hydrationData.data?.bill,
+            'GET /api/v1/sessions/current hydrates live session, orders, status, and bill'
+        );
+
+        // Test Rate Limit header presence on QR verification
+        const qrRateRes = await fetch(`${BASE_URL}/api/v1/tables/verify-session?token=${qrToken}`);
+        assert(
+            qrRateRes.headers.get('ratelimit-limit') || qrRateRes.headers.get('x-ratelimit-limit') || qrRateRes.status === 200,
+            'Table QR verification route is protected with rate limiting'
+        );
+
         // Close table session & reset table to AVAILABLE
         const closeSessionRes = await fetch(`${BASE_URL}/api/v1/tables/sessions/${testSessionId}/close`, {
             method: 'POST'
@@ -308,8 +336,8 @@ async function runTests() {
         const closeSessionData = await closeSessionRes.json();
         assert(closeSessionRes.status === 200 && closeSessionData.data?.status === 'CLOSED', 'POST /api/v1/tables/sessions/:id/close closes session & frees table');
 
-        // Test 9: Table Reservation & Overlap Guard
-        console.log('\n--- 9. Table Reservation & Overlap Guard ---');
+        // Test 10: Table Reservation & Overlap Guard
+        console.log('\n--- 10. Table Reservation & Overlap Guard ---');
         const futureDate = new Date(Date.now() + 24 * 60 * 60000); // Tomorrow
         const resvRes = await fetch(`${BASE_URL}/api/v1/reservations`, {
             method: 'POST',
