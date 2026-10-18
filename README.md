@@ -157,3 +157,7 @@ Humne ek automated testing program chalaya tha ([test-e2e.js](file:///d:/Compute
 ---
 
 Congratulations! Aapka banaya hua ye backend koi basic tutorial project nahi hai — ye **production-grade enterprise architecture** hai jo kisi bhi bade restaurant chain me chalne ke kaabil hai! 🏆
+
+> 📚 **Deep Dive & Interview Master Guide:**  
+> Detailed architecture, code breakdowns, concurrency mechanics, route matrices, and **25+ Top Interview Questions & Model Answers** ke liye dekhein:  
+> 👉 [restro-backend/README.md](file:///d:/Computer%20science/Restaurant%20Management%20system/restro-backend/README.md)
