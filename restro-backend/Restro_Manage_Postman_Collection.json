@@ -317,6 +317,21 @@
 					}
 				}
 			]
+		},
+		{
+			"name": "9. Session State Hydration",
+			"item": [
+				{
+					"name": "Get Current Session State (Hydration)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "x-session-token", "value": "{{QR_TOKEN}}" }
+						],
+						"url": "http://localhost:5000/api/v1/sessions/current"
+					}
+				}
+			]
 		}
 	]
 }
