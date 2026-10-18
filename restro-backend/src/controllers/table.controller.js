@@ -4,7 +4,7 @@ import { TABLE_STATUS, TABLE_SESSION_STATUS } from '../constants.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiError } from '../utils/apiError.js';
 import { ApiResponse } from '../utils/apiResponse.js';
-import { generateTableToken } from '../utils/token.js';
+import { generateTableToken, generateSessionToken } from '../utils/token.js';
 
 /**
  * Create a new physical table (Admin / Floor setup)
@@ -130,6 +130,9 @@ export const verifyAndGetSession = asyncHandler(async (req, res) => {
         await table.save();
     }
 
+    // Issue session token for hydration and subsequent API calls
+    const sessionToken = generateSessionToken(activeSession._id, activeSession.table_number);
+
     return res.status(200).json(
         new ApiResponse(200, {
             table: {
@@ -139,7 +142,8 @@ export const verifyAndGetSession = asyncHandler(async (req, res) => {
                 floor: table.floor,
                 status: table.status
             },
-            session: activeSession
+            session: activeSession,
+            sessionToken
         }, 'Table session verified successfully.')
     );
 });
