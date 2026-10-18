@@ -1,0 +1,322 @@
+{
+	"info": {
+		"_postman_id": "restro-manage-apis-2026",
+		"name": "Restro Manage - Complete Backend APIs",
+		"description": "Complete collection of endpoints for Restro Manage (Auth, Tables, Menu, Orders, Waiter Dispatch, Kitchen KDS, Billing, Reservations)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Health Check",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/health",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "5000",
+					"path": ["health"]
+				}
+			}
+		},
+		{
+			"name": "2. Staff Auth",
+			"item": [
+				{
+					"name": "Register Waiter",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Ramesh Waiter\",\n  \"email\": \"ramesh@restro.com\",\n  \"password\": \"password123\",\n  \"role\": \"WAITER\",\n  \"phone\": \"9876543210\"\n}"
+						},
+						"url": "http://localhost:5000/api/v1/auth/register"
+					}
+				},
+				{
+					"name": "Login Staff",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"ramesh@restro.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": "http://localhost:5000/api/v1/auth/login"
+					}
+				},
+				{
+					"name": "Get Profile (Bearer Auth)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{STAFF_TOKEN}}" }
+						],
+						"url": "http://localhost:5000/api/v1/auth/me"
+					}
+				}
+			]
+		},
+		{
+			"name": "3. Table & Floor Management",
+			"item": [
+				{
+					"name": "Create Table",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"table_number\": \"T-01\",\n  \"capacity\": 4,\n  \"floor\": \"Ground Floor\"\n}"
+						},
+						"url": "http://localhost:5000/api/v1/tables"
+					}
+				},
+				{
+					"name": "Get All Tables",
+					"request": {
+						"method": "GET",
+						"url": "http://localhost:5000/api/v1/tables"
+					}
+				},
+				{
+					"name": "Generate Table QR Token",
+					"request": {
+						"method": "GET",
+						"url": "http://localhost:5000/api/v1/tables/generate-qr/T-01"
+					}
+				},
+				{
+					"name": "Verify QR & Open Session",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "http://localhost:5000/api/v1/tables/verify-session?token={{QR_TOKEN}}",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "5000",
+							"path": ["api", "v1", "tables", "verify-session"],
+							"query": [
+								{ "key": "token", "value": "{{QR_TOKEN}}" }
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "4. Menu & Nutrition CMS",
+			"item": [
+				{
+					"name": "Create Category",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"restaurant_id\": \"650000000000000000000001\",\n  \"name\": \"Main Course\",\n  \"description\": \"Special Curries\"\n}"
+						},
+						"url": "http://localhost:5000/api/v1/menu/categories"
+					}
+				},
+				{
+					"name": "Get Categories",
+					"request": {
+						"method": "GET",
+						"url": "http://localhost:5000/api/v1/menu/categories"
+					}
+				},
+				{
+					"name": "Add Dish with Macronutrients",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"restaurant_id\": \"650000000000000000000001\",\n  \"category_id\": \"{{CATEGORY_ID}}\",\n  \"name\": \"Paneer Butter Masala\",\n  \"description\": \"Rich tomato gravy with fresh paneer\",\n  \"price_paise\": 32000,\n  \"nutrition\": {\n    \"calories\": 480,\n    \"protein\": 18,\n    \"fat\": 32,\n    \"carbs\": 22\n  },\n  \"ingredients\": [\"Paneer\", \"Butter\", \"Tomato\", \"Cashew\"],\n  \"allergens\": [\"Dairy\", \"Nuts\"],\n  \"dietary_labels\": [\"VEG\"]\n}"
+						},
+						"url": "http://localhost:5000/api/v1/menu/items"
+					}
+				},
+				{
+					"name": "Get Menu Items",
+					"request": {
+						"method": "GET",
+						"url": "http://localhost:5000/api/v1/menu/items"
+					}
+				}
+			]
+		},
+		{
+			"name": "5. Orders & Waiter Dispatch",
+			"item": [
+				{
+					"name": "Place Order (Customer)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"session_id\": \"{{SESSION_ID}}\",\n  \"customer_phone\": \"9876543210\",\n  \"customer_notes\": \"Make it medium spicy\",\n  \"items\": [\n    {\n      \"menu_item_id\": \"{{MENU_ITEM_ID}}\",\n      \"quantity\": 2,\n      \"special_instructions\": \"Less oil please\"\n    }\n  ]\n}"
+						},
+						"url": "http://localhost:5000/api/v1/orders"
+					}
+				},
+				{
+					"name": "Get Unassigned Queue (Waiter)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{STAFF_TOKEN}}" }
+						],
+						"url": "http://localhost:5000/api/v1/orders/unassigned"
+					}
+				},
+				{
+					"name": "Claim Order (Atomic Lock)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{STAFF_TOKEN}}" }
+						],
+						"url": "http://localhost:5000/api/v1/orders/{{ORDER_ID}}/claim"
+					}
+				},
+				{
+					"name": "Physically Verify Order at Table",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{STAFF_TOKEN}}" }
+						],
+						"url": "http://localhost:5000/api/v1/orders/{{ORDER_ID}}/verify"
+					}
+				}
+			]
+		},
+		{
+			"name": "6. Kitchen Display System (KDS)",
+			"item": [
+				{
+					"name": "Get Active Kitchen Tickets",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{STAFF_TOKEN}}" }
+						],
+						"url": "http://localhost:5000/api/v1/kitchen/tickets"
+					}
+				},
+				{
+					"name": "Update Dish Status (Preparing/Ready)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{STAFF_TOKEN}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"READY\"\n}"
+						},
+						"url": "http://localhost:5000/api/v1/kitchen/tickets/{{TICKET_ID}}/items/{{ITEM_ID}}/status"
+					}
+				},
+				{
+					"name": "Waiter Marks Order Served",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{STAFF_TOKEN}}" }
+						],
+						"url": "http://localhost:5000/api/v1/kitchen/orders/{{ORDER_ID}}/serve"
+					}
+				}
+			]
+		},
+		{
+			"name": "7. Unified Billing & Payments",
+			"item": [
+				{
+					"name": "Get or Generate Primary Bill",
+					"request": {
+						"method": "GET",
+						"url": "http://localhost:5000/api/v1/billing/sessions/{{SESSION_ID}}"
+					}
+				},
+				{
+					"name": "Finalize Bill (Lock)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{STAFF_TOKEN}}" }
+						],
+						"url": "http://localhost:5000/api/v1/billing/{{BILL_ID}}/finalize"
+					}
+				},
+				{
+					"name": "Record Payment (UPI/Cash)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{STAFF_TOKEN}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"payment_method\": \"UPI\",\n  \"amount_paise\": 67200,\n  \"transaction_reference\": \"UPI-REF-123456\"\n}"
+						},
+						"url": "http://localhost:5000/api/v1/billing/{{BILL_ID}}/payments"
+					}
+				},
+				{
+					"name": "Close Table Session",
+					"request": {
+						"method": "POST",
+						"url": "http://localhost:5000/api/v1/tables/sessions/{{SESSION_ID}}/close"
+					}
+				}
+			]
+		},
+		{
+			"name": "8. Table Reservations",
+			"item": [
+				{
+					"name": "Book Table Reservation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"table_id\": \"{{TABLE_ID}}\",\n  \"customer_name\": \"Vikram Malhotra\",\n  \"customer_phone\": \"9876543210\",\n  \"party_size\": 4,\n  \"start_at\": \"2026-10-25T19:30:00.000Z\",\n  \"duration_minutes\": 120\n}"
+						},
+						"url": "http://localhost:5000/api/v1/reservations"
+					}
+				},
+				{
+					"name": "Get Reservations",
+					"request": {
+						"method": "GET",
+						"url": "http://localhost:5000/api/v1/reservations"
+					}
+				}
+			]
+		}
+	]
+}
