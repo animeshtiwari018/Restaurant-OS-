@@ -9,6 +9,7 @@ import orderRouter from './routes/order.routes.js';
 import kitchenRouter from './routes/kitchen.routes.js';
 import reservationRouter from './routes/reservation.routes.js';
 import billingRouter from './routes/billing.routes.js';
+import sessionRouter from './routes/session.routes.js';
 
 // Middlewares
 import errorHandler from './middlewares/error.middleware.js';
@@ -34,6 +35,7 @@ app.get('/health', (req, res) => {
 // Mount Domain API Routes
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/tables', tableRouter);
+app.use('/api/v1/sessions', sessionRouter);
 app.use('/api/v1/menu', menuRouter);
 app.use('/api/v1/orders', orderRouter);
 app.use('/api/v1/kitchen', kitchenRouter);
