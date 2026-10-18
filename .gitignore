@@ -15,4 +15,9 @@ dist/
 build/
 
 # Frontend application (Customer Web)
-customer-web/
+customer-web/
+
+# Agent skills
+.agents/skills/
+skills/
+**/skills/
