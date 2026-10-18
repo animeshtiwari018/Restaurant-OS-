@@ -13,3 +13,6 @@ yarn-error.log*
 .DS_Store
 dist/
 build/
+
+# Frontend application (Customer Web)
+customer-web/
