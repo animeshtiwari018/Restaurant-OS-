@@ -1,5 +1,7 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 // Routers
 import authRouter from './routes/auth.routes.js';
@@ -14,6 +16,9 @@ import sessionRouter from './routes/session.routes.js';
 // Middlewares
 import errorHandler from './middlewares/error.middleware.js';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
 
 app.use(cors({
@@ -24,12 +29,20 @@ app.use(cors({
 app.use(express.json({ limit: '16kb' }));
 app.use(express.urlencoded({ extended: true, limit: '16kb' }));
 
+// Serve static test UI & assets
+app.use(express.static(path.join(__dirname, '../public')));
+
 // Health Check
 app.get('/health', (req, res) => {
     res.status(200).json({
         success: true,
         message: 'Restro backend server is healthy'
     });
+});
+
+// Socket.IO Visual Verification Tester
+app.get('/socket-tester', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/socket-tester.html'));
 });
 
 // Mount Domain API Routes
