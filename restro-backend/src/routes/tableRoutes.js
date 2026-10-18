@@ -1,26 +1,25 @@
 import { Router } from 'express';
-import { generateTableToken, verifyTableToken } from '../utils/token.js';
+import { verifyTableToken } from '../utils/token.js';
+import {
+    createTable,
+    getTables,
+    getTableQRCode,
+    verifyAndGetSession,
+    closeTableSession
+} from '../controllers/table.controller.js';
 
 const router = Router();
 
-router.get('/generate-qr/:tableNumber', (req, res) => {
-    const { tableNumber } = req.params;
-    const token = generateTableToken(tableNumber);
+// Table management
+router.route('/')
+    .post(createTable)
+    .get(getTables);
 
-    res.status(200).json({
-        success: true,
-        tableNumber,
-        token,
-        fullScanUrl: `http://localhost:5173/menu?token=${token}`
-    });
-});
+// QR generation & session verification
+router.get('/generate-qr/:tableNumber', getTableQRCode);
+router.get('/verify-session', verifyTableToken, verifyAndGetSession);
 
-router.get('/verify-session', verifyTableToken, (req, res) => {
-    res.status(200).json({
-        success: true,
-        message: 'Table authenticated successfully!',
-        session: req.tableContext
-    });
-});
+// Session closure
+router.post('/sessions/:sessionId/close', closeTableSession);
 
 export default router;
