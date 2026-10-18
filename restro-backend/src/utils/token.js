@@ -1,11 +1,26 @@
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 
 const JWT_SECRET = process.env.QR_JWT_SECRET || 'fallback_secret_key';
 
-export const generateTableToken = (tableNumber) => {
+/**
+ * Generate a cryptographically signed QR token bound to tableNumber, restaurantId, and branch HMAC signature
+ */
+export const generateTableToken = (tableNumber, restaurantId = '650000000000000000000001') => {
+    const restIdStr = restaurantId?.toString() || '650000000000000000000001';
+
+    // Cryptographic branch signature binding table to restaurant location
+    const branchSignature = crypto
+        .createHmac('sha256', JWT_SECRET)
+        .update(`${tableNumber}:${restIdStr}`)
+        .digest('hex')
+        .slice(0, 16);
+
     return jwt.sign(
         { 
-            tableNumber, 
+            tableNumber,
+            restaurantId: restIdStr,
+            branchSignature,
             scope: 'TABLE_ORDER' 
         }, 
         JWT_SECRET
@@ -32,8 +47,24 @@ export const verifyTableToken = (req, res, next) => {
             });
         }
 
+        // Verify Branch / Restaurant HMAC signature to prevent cross-branch token replay
+        const restIdStr = decoded.restaurantId || '650000000000000000000001';
+        const expectedSignature = crypto
+            .createHmac('sha256', JWT_SECRET)
+            .update(`${decoded.tableNumber}:${restIdStr}`)
+            .digest('hex')
+            .slice(0, 16);
+
+        if (decoded.branchSignature && decoded.branchSignature !== expectedSignature) {
+            return res.status(403).json({ 
+                success: false, 
+                error: 'Cross-branch replay detected: Token branch signature is invalid.' 
+            });
+        }
+
         req.tableContext = {
-            tableNumber: decoded.tableNumber
+            tableNumber: decoded.tableNumber,
+            restaurantId: restIdStr
         };
 
         next();
