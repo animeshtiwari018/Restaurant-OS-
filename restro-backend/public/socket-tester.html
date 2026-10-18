@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Restro Manage - Real-Time Socket.IO Live Tester</title>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <style>
+    :root {
+      --bg: #0b0f17;
+      --card-bg: #111827;
+      --border: #1f2937;
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --amber: #f59e0b;
+      --emerald: #10b981;
+      --indigo: #6366f1;
+      --rose: #f43f5e;
+      --cyan: #06b6d4;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1050px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 16px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .title-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #0b0f17;
+      font-weight: 900;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 600;
+      background: #1e293b;
+      border: 1px solid var(--border);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--rose);
+    }
+
+    .status-dot.connected {
+      background: var(--emerald);
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--amber);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .role-selector {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .role-card {
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      cursor: pointer;
+      background: #0f172a;
+      transition: all 0.2s ease;
+    }
+
+    .role-card:hover {
+      border-color: #3b82f6;
+    }
+
+    .role-card.active {
+      border-color: var(--amber);
+      background: rgba(245, 158, 11, 0.08);
+    }
+
+    .role-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 6px;
+    }
+
+    .role-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .controls-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    input,
+    select,
+    button {
+      font-family: inherit;
+      font-size: 13px;
+    }
+
+    input[type="text"] {
+      background: #0f172a;
+      border: 1px solid var(--border);
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 10px;
+      flex: 1;
+      min-width: 200px;
+    }
+
+    button {
+      padding: 9px 18px;
+      border-radius: 10px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--amber);
+      color: #0b0f17;
+    }
+
+    .btn-primary:hover {
+      background: #d97706;
+    }
+
+    .btn-secondary {
+      background: #374151;
+      color: #f3f4f6;
+    }
+
+    .btn-secondary:hover {
+      background: #4b5563;
+    }
+
+    .btn-success {
+      background: #059669;
+      color: #fff;
+    }
+
+    .btn-success:hover {
+      background: #047857;
+    }
+
+    .btn-indigo {
+      background: var(--indigo);
+      color: #fff;
+    }
+
+    .btn-indigo:hover {
+      background: #4f46e5;
+    }
+
+    .actions-panel {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      margin-top: 16px;
+    }
+
+    .logs-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .log-container {
+      background: #050811;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      height: 440px;
+      overflow-y: auto;
+      font-family: "Fira Code", monospace, Consolas, sans-serif;
+      font-size: 12px;
+    }
+
+    .log-empty {
+      color: #475569;
+      text-align: center;
+      padding-top: 180px;
+      font-style: italic;
+    }
+
+    .log-entry {
+      background: #0f172a;
+      border-left: 4px solid var(--amber);
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin-bottom: 10px;
+      animation: fadeIn 0.2s ease-in;
+    }
+
+    .log-entry.NEW_ORDER_DISPATCH {
+      border-left-color: var(--amber);
+      background: rgba(245, 158, 11, 0.05);
+    }
+
+    .log-entry.ORDER_CLAIMED {
+      border-left-color: var(--cyan);
+      background: rgba(6, 182, 212, 0.05);
+    }
+
+    .log-entry.KDS_TICKET_QUEUED {
+      border-left-color: var(--emerald);
+      background: rgba(16, 185, 129, 0.05);
+    }
+
+    .log-entry.ORDER_STATUS_UPDATE {
+      border-left-color: var(--indigo);
+      background: rgba(99, 102, 241, 0.05);
+    }
+
+    .log-entry.FOOD_READY_ALERT {
+      border-left-color: var(--rose);
+      background: rgba(244, 63, 94, 0.05);
+    }
+
+    .log-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .log-event-tag {
+      font-weight: 700;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: #1e293b;
+      color: #fff;
+    }
+
+    .log-time {
+      color: #64748b;
+      font-size: 10px;
+    }
+
+    pre {
+      color: #cbd5e1;
+      white-space: pre-wrap;
+      word-break: break-all;
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-4px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <div class="title-group">
+        <div class="logo">R</div>
+        <div>
+          <h1 id="pageHeading">Restro Socket.IO Real-Time Tester</h1>
+          <div class="subtitle">Multi-Tab Waiter & Kitchen Gateway Verification</div>
+        </div>
+      </div>
+      <div class="status-badge">
+        <div id="statusDot" class="status-dot"></div>
+        <span id="statusText">Disconnected</span>
+      </div>
+    </header>
+
+    <!-- Card 1: Role Configuration -->
+    <div class="card">
+      <div class="section-title">1. Select Tab Role & Room Subscription</div>
+      <div class="role-selector">
+        <div class="role-card active" id="roleWaiter" onclick="selectRole('waiter')">
+          <div class="role-header">
+            <span>🚶‍♂️ Tab 1: Waiter</span>
+            <span style="color: var(--amber); font-size: 11px;">room:waiters</span>
+          </div>
+          <div class="role-desc">
+            Listens for: <code>NEW_ORDER_DISPATCH</code>, <code>ORDER_CLAIMED</code>, <code>FOOD_READY_ALERT</code>
+          </div>
+        </div>
+
+        <div class="role-card" id="roleKitchen" onclick="selectRole('kitchen')">
+          <div class="role-header">
+            <span>👨‍🍳 Tab 2: Kitchen (KDS)</span>
+            <span style="color: var(--emerald); font-size: 11px;">room:kitchen</span>
+          </div>
+          <div class="role-desc">
+            Listens for: <code>KDS_TICKET_QUEUED</code> (New KOT ticket pushed on physical verification)
+          </div>
+        </div>
+
+        <div class="role-card" id="roleCustomer" onclick="selectRole('customer')">
+          <div class="role-header">
+            <span>📱 Customer Phone</span>
+            <span style="color: var(--indigo); font-size: 11px;">room:session_&lt;id&gt;</span>
+          </div>
+          <div class="role-desc">
+            Listens for: <code>ORDER_STATUS_UPDATE</code> (CONFIRMED, SERVED), <code>FOOD_READY_ALERT</code>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls-grid">
+        <input type="text" id="serverUrl" value="http://localhost:5000" placeholder="Socket.IO Server URL" />
+        <input type="text" id="sessionIdInput" placeholder="Session ID (For Customer Role)" style="display: none;" />
+        <button id="connectBtn" class="btn-primary" onclick="toggleConnect()">Connect Socket</button>
+      </div>
+
+      <!-- Quick Action Buttons for REST API simulation -->
+      <div class="actions-panel">
+        <span
+          style="font-size: 11px; font-weight: 700; color: var(--text-muted); align-self: center; margin-right: 6px;">
+          REST API Triggers:
+        </span>
+        <button class="btn-secondary" onclick="triggerCreateOrder()">1. Place Customer Order (API)</button>
+        <button class="btn-secondary" onclick="triggerClaimOrder()">2. Claim Order (API)</button>
+        <button class="btn-success" onclick="triggerVerifyOrder()">3. Verify Order (API) ➔ KDS</button>
+        <button class="btn-indigo" onclick="triggerReadyItem()">4. Mark Dish Ready (API)</button>
+      </div>
+    </div>
+
+    <!-- Card 2: Live Real-Time Events Feed -->
+    <div class="card">
+      <div class="logs-header">
+        <div class="section-title" style="margin-bottom: 0;">2. Real-Time Inbound Event Feed</div>
+        <button class="btn-secondary" style="padding: 4px 10px; font-size: 11px;" onclick="clearLogs()">Clear
+          Log</button>
+      </div>
+
+      <div id="logContainer" class="log-container">
+        <div class="log-empty">Waiting for connection and incoming WebSocket events...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let socket = null;
+    let currentRole = 'waiter';
+    let lastPlacedOrderId = null;
+    let lastKitchenTicketId = null;
+    let lastKitchenItemId = null;
+    let waiterToken = null;
+    let kitchenToken = null;
+
+    // Check URL parameters (e.g. ?role=waiter or ?role=kitchen)
+    const urlParams = new URLSearchParams(window.location.search);
+    const paramRole = urlParams.get('role');
+    if (paramRole === 'kitchen' || paramRole === 'waiter' || paramRole === 'customer') {
+      selectRole(paramRole);
+    }
+
+    function selectRole(role) {
+      currentRole = role;
+      document.getElementById('roleWaiter').classList.toggle('active', role === 'waiter');
+      document.getElementById('roleKitchen').classList.toggle('active', role === 'kitchen');
+      document.getElementById('roleCustomer').classList.toggle('active', role === 'customer');
+
+      document.getElementById('sessionIdInput').style.display = role === 'customer' ? 'block' : 'none';
+
+      // Update tab title
+      if (role === 'waiter') {
+        document.title = '[Tab 1: Waiter] Restro Socket Tester';
+        document.getElementById('pageHeading').innerText = 'Tab 1: Waiter Display (room:waiters)';
+      } else if (role === 'kitchen') {
+        document.title = '[Tab 2: Kitchen KDS] Restro Socket Tester';
+        document.getElementById('pageHeading').innerText = 'Tab 2: Kitchen Display (room:kitchen)';
+      } else {
+        document.title = '[Customer] Restro Socket Tester';
+        document.getElementById('pageHeading').innerText = 'Customer Live Tracker (room:session)';
+      }
+
+      // If already connected, join new room
+      if (socket && socket.connected) {
+        joinSelectedRoom();
+      }
+    }
+
+    function toggleConnect() {
+      if (socket && socket.connected) {
+        socket.disconnect();
+        return;
+      }
+
+      const serverUrl = document.getElementById('serverUrl').value.trim() || 'http://localhost:5000';
+      const sessionId = document.getElementById('sessionIdInput').value.trim();
+
+      addLog('SYSTEM', { message: `Connecting to ${serverUrl} as ${currentRole.toUpperCase()}...` });
+
+      socket = io(serverUrl, {
+        transports: ['websocket', 'polling'],
+        query: {
+          role: currentRole,
+          sessionId: sessionId
+        }
+      });
+
+      socket.on('connect', () => {
+        document.getElementById('statusDot').classList.add('connected');
+        document.getElementById('statusText').innerText = `Connected (ID: ${socket.id.slice(0, 6)})`;
+        document.getElementById('connectBtn').innerText = 'Disconnect';
+        document.getElementById('connectBtn').className = 'btn-secondary';
+
+        joinSelectedRoom();
+      });
+
+      socket.on('disconnect', () => {
+        document.getElementById('statusDot').classList.remove('connected');
+        document.getElementById('statusText').innerText = 'Disconnected';
+        document.getElementById('connectBtn').innerText = 'Connect Socket';
+        document.getElementById('connectBtn').className = 'btn-primary';
+        addLog('SYSTEM', { message: 'Socket disconnected' });
+      });
+
+      socket.on('connect_error', (err) => {
+        addLog('ERROR', { message: `Connection error: ${err.message}` });
+      });
+
+      // Register Listeners for all domain events
+      socket.on('NEW_ORDER_DISPATCH', (data) => {
+        lastPlacedOrderId = data._id || data.id;
+        addLog('NEW_ORDER_DISPATCH', data);
+      });
+
+      socket.on('ORDER_CLAIMED', (data) => {
+        addLog('ORDER_CLAIMED', data);
+      });
+
+      socket.on('KDS_TICKET_QUEUED', (data) => {
+        lastKitchenTicketId = data._id || data.id;
+        if (data.items && data.items.length > 0) {
+          lastKitchenItemId = data.items[0]._id;
+        }
+        addLog('KDS_TICKET_QUEUED', data);
+      });
+
+      socket.on('ORDER_STATUS_UPDATE', (data) => {
+        addLog('ORDER_STATUS_UPDATE', data);
+      });
+
+      socket.on('FOOD_READY_ALERT', (data) => {
+        addLog('FOOD_READY_ALERT', data);
+      });
+    }
+
+    function joinSelectedRoom() {
+      if (!socket || !socket.connected) return;
+
+      if (currentRole === 'waiter') {
+        socket.emit('join_waiters');
+        addLog('SYSTEM', { message: 'Emitted join_waiters ➔ Subscribed to room:waiters' });
+      } else if (currentRole === 'kitchen') {
+        socket.emit('join_kitchen');
+        addLog('SYSTEM', { message: 'Emitted join_kitchen ➔ Subscribed to room:kitchen' });
+      } else if (currentRole === 'customer') {
+        const sessId = document.getElementById('sessionIdInput').value.trim() || 'active_session';
+        socket.emit('join_session', sessId);
+        addLog('SYSTEM', { message: `Emitted join_session ➔ Subscribed to room:session_${sessId}` });
+      }
+    }
+
+    function addLog(event, data) {
+      const container = document.getElementById('logContainer');
+      const emptyPlaceholder = container.querySelector('.log-empty');
+      if (emptyPlaceholder) emptyPlaceholder.remove();
+
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${event}`;
+
+      const now = new Date().toLocaleTimeString();
+
+      entry.innerHTML = `
+        <div class="log-meta">
+          <span class="log-event-tag">${event}</span>
+          <span class="log-time">${now}</span>
+        </div>
+        <pre>${JSON.stringify(data, null, 2)}</pre>
+      `;
+
+      container.insertBefore(entry, container.firstChild);
+    }
+
+    function clearLogs() {
+      const container = document.getElementById('logContainer');
+      container.innerHTML = '<div class="log-empty">Waiting for connection and incoming WebSocket events...</div>';
+    }
+
+    // --- Helper REST API calls for quick testing ---
+    async function getBaseUrl() {
+      return document.getElementById('serverUrl').value.trim() || 'http://localhost:5000';
+    }
+
+    async function ensureWaiterToken() {
+      if (waiterToken) return waiterToken;
+      const base = await getBaseUrl();
+      const email = `waiter_${Date.now()}@restro.com`;
+      await fetch(`${base}/api/v1/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: 'Live Waiter', email, password: 'password123', role: 'WAITER' })
+      });
+      const login = await fetch(`${base}/api/v1/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password: 'password123' })
+      });
+      const data = await login.json();
+      waiterToken = data.data?.token;
+      return waiterToken;
+    }
+
+    async function ensureKitchenToken() {
+      if (kitchenToken) return kitchenToken;
+      const base = await getBaseUrl();
+      const email = `chef_${Date.now()}@restro.com`;
+      await fetch(`${base}/api/v1/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: 'Chef Live', email, password: 'password123', role: 'KITCHEN' })
+      });
+      const login = await fetch(`${base}/api/v1/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password: 'password123' })
+      });
+      const data = await login.json();
+      kitchenToken = data.data?.token;
+      return kitchenToken;
+    }
+
+    async function triggerCreateOrder() {
+      try {
+        const base = await getBaseUrl();
+        // 1. Get or create table session
+        const tblNum = `T-${Math.floor(Math.random() * 80) + 10}`;
+        await fetch(`${base}/api/v1/tables`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ table_number: tblNum, capacity: 4 })
+        });
+        const qrRes = await fetch(`${base}/api/v1/tables/generate-qr/${tblNum}`);
+        const qrData = await qrRes.json();
+        const token = qrData.data?.token;
+
+        const verifyRes = await fetch(`${base}/api/v1/tables/verify-session?token=${token}`);
+        const verifyData = await verifyRes.json();
+        const sessionId = verifyData.data?.session?._id;
+
+        // 2. Fetch menu item
+        const menuRes = await fetch(`${base}/api/v1/menu/items`);
+        const menuData = await menuRes.json();
+        const menuItem = menuData.data?.[0];
+
+        if (!menuItem) {
+          alert('No menu items found! Run seed.js or create a menu item first.');
+          return;
+        }
+
+        // 3. Place Order
+        const orderRes = await fetch(`${base}/api/v1/orders`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            session_id: sessionId,
+            customer_phone: '9876543210',
+            customer_notes: 'Real-time test order',
+            items: [{ menu_item_id: menuItem._id, quantity: 2 }]
+          })
+        });
+        const orderData = await orderRes.json();
+        lastPlacedOrderId = orderData.data?._id;
+        addLog('TRIGGER: POST /api/v1/orders', orderData.data);
+      } catch (err) {
+        alert('Error placing order: ' + err.message);
+      }
+    }
+
+    async function triggerClaimOrder() {
+      if (!lastPlacedOrderId) {
+        alert('Please place an order first (Step 1).');
+        return;
+      }
+      try {
+        const base = await getBaseUrl();
+        const token = await ensureWaiterToken();
+        const res = await fetch(`${base}/api/v1/orders/${lastPlacedOrderId}/claim`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        addLog('TRIGGER: POST /claim', data.data);
+      } catch (err) {
+        alert('Error claiming order: ' + err.message);
+      }
+    }
+
+    async function triggerVerifyOrder() {
+      if (!lastPlacedOrderId) {
+        alert('Please place an order first.');
+        return;
+      }
+      try {
+        const base = await getBaseUrl();
+        const token = await ensureWaiterToken();
+        const res = await fetch(`${base}/api/v1/orders/${lastPlacedOrderId}/verify`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        addLog('TRIGGER: POST /verify', data.data);
+
+        // Fetch ticket
+        const chefToken = await ensureKitchenToken();
+        const ticketRes = await fetch(`${base}/api/v1/kitchen/tickets`, {
+          headers: { Authorization: `Bearer ${chefToken}` }
+        });
+        const ticketData = await ticketRes.json();
+        const ticket = ticketData.data?.find(t => t.order_id === lastPlacedOrderId);
+        if (ticket) {
+          lastKitchenTicketId = ticket._id;
+          lastKitchenItemId = ticket.items?.[0]?._id;
+        }
+      } catch (err) {
+        alert('Error verifying order: ' + err.message);
+      }
+    }
+
+    async function triggerReadyItem() {
+      if (!lastKitchenTicketId || !lastKitchenItemId) {
+        alert('Please verify an order first so a Kitchen Ticket exists.');
+        return;
+      }
+      try {
+        const base = await getBaseUrl();
+        const chefToken = await ensureKitchenToken();
+        const res = await fetch(`${base}/api/v1/kitchen/tickets/${lastKitchenTicketId}/items/${lastKitchenItemId}/status`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${chefToken}`
+          },
+          body: JSON.stringify({ status: 'READY' })
+        });
+        const data = await res.json();
+        addLog('TRIGGER: PATCH dish -> READY', data.data);
+      } catch (err) {
+        alert('Error updating dish status: ' + err.message);
+      }
+    }
+  </script>
+</body>
+
+</html>
