@@ -7,6 +7,8 @@ import {
     verifyAndGetSession,
     closeTableSession
 } from '../controllers/table.controller.js';
+import { getCurrentSessionState } from '../controllers/session.controller.js';
+import { qrVerificationLimiter, sessionRateLimiter } from '../middlewares/rateLimiter.middleware.js';
 
 const router = Router();
 
@@ -15,11 +17,14 @@ router.route('/')
     .post(createTable)
     .get(getTables);
 
-// QR generation & session verification
-router.get('/generate-qr/:tableNumber', getTableQRCode);
-router.get('/verify-session', verifyTableToken, verifyAndGetSession);
+// QR generation & session verification with rate limiting
+router.get('/generate-qr/:tableNumber', qrVerificationLimiter, getTableQRCode);
+router.get('/verify-session', qrVerificationLimiter, verifyTableToken, verifyAndGetSession);
+
+// Session reconnection / state hydration (also accessible via /api/v1/tables/sessions/current)
+router.get('/sessions/current', sessionRateLimiter, getCurrentSessionState);
 
 // Session closure
-router.post('/sessions/:sessionId/close', closeTableSession);
+router.post('/sessions/:sessionId/close', sessionRateLimiter, closeTableSession);
 
 export default router;
