@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { STAFF_ROLES } from '../constants.js';
+import { STAFF_ROLES, STAFF_STATUS } from '../constants.js';
 
 const staffSchema = new mongoose.Schema(
     {
@@ -16,15 +16,30 @@ const staffSchema = new mongoose.Schema(
             trim: true,
             index: true
         },
+        password: {
+            type: String,
+            trim: true
+        },
         password_hash: {
             type: String,
-            required: [true, 'Password hash is required']
+            trim: true
         },
         role: {
             type: String,
             enum: Object.values(STAFF_ROLES),
             default: STAFF_ROLES.WAITER,
             index: true
+        },
+        status: {
+            type: String,
+            enum: Object.values(STAFF_STATUS),
+            default: STAFF_STATUS.ACTIVE,
+            index: true
+        },
+        station: {
+            type: String,
+            trim: true,
+            default: null
         },
         phone: {
             type: String,
@@ -38,6 +53,24 @@ const staffSchema = new mongoose.Schema(
     },
     { timestamps: true }
 );
+
+// Ensure password/password_hash synchronization and status/is_active coherence
+staffSchema.pre('validate', function () {
+    if (this.password && !this.password_hash) {
+        this.password_hash = this.password;
+    }
+    if (this.password_hash && !this.password) {
+        this.password = this.password_hash;
+    }
+    if (!this.password && !this.password_hash) {
+        this.invalidate('password', 'Password is required');
+    }
+    if (this.status) {
+        this.is_active = this.status === STAFF_STATUS.ACTIVE;
+    } else if (typeof this.is_active === 'boolean') {
+        this.status = this.is_active ? STAFF_STATUS.ACTIVE : STAFF_STATUS.INACTIVE;
+    }
+});
 
 export const Staff = mongoose.model('Staff', staffSchema);
 export default Staff;
