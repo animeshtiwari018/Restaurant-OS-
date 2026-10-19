@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { TableSession } from '@/types/dining';
 import { sessionApi } from '@/services/api';
 
@@ -40,6 +41,9 @@ export const TableSessionHeader: React.FC<TableSessionHeaderProps> = ({
     }
   };
 
+  const pathname = usePathname();
+  const isDedicatedStatusPage = pathname === '/order-status' || pathname === '/my-order';
+
   return (
     <>
       {/* Sticky Brand & Table Bar */}
@@ -72,7 +76,7 @@ export const TableSessionHeader: React.FC<TableSessionHeaderProps> = ({
               type="button"
               onClick={() => setShowOptionsModal(true)}
               aria-label="Call Waiter"
-              className="h-9 px-3 flex items-center gap-1.5 rounded-full bg-surface-container text-[#594139] hover:text-primary active:scale-95 transition-all text-xs font-semibold shadow-sm touch-manipulation"
+              className="h-9 px-3 flex items-center gap-1.5 rounded-full bg-surface-container text-[#594139] hover:text-primary active:scale-95 transition-all text-xs font-semibold shadow-sm touch-manipulation cursor-pointer"
             >
               <span className="material-symbols-outlined text-[17px] text-primary">room_service</span>
               <span>Call Staff</span>
@@ -95,40 +99,42 @@ export const TableSessionHeader: React.FC<TableSessionHeaderProps> = ({
         </div>
       )}
 
-      {/* Table & Service Status Card */}
-      <div className="pt-3 px-4">
-        <div className="bg-surface-container rounded-2xl p-3.5 shadow-sm border border-hairline flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-surface-lowest flex items-center justify-center flex-shrink-0 text-primary shadow-sm">
-              <span className="material-symbols-outlined text-[22px]">table_restaurant</span>
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
-                <span className="relative flex h-2 w-2 flex-shrink-0">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-600 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600"></span>
-                </span>
-                <span className="text-[11px] font-bold text-emerald-700 tracking-wide uppercase">
-                  Session Open
-                </span>
+      {/* Table & Service Status Card (Only shown when not on dedicated status/order pages) */}
+      {!isDedicatedStatusPage && (
+        <div className="pt-3 px-4">
+          <div className="bg-surface-container rounded-2xl p-3.5 shadow-sm border border-hairline flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-surface-lowest flex items-center justify-center flex-shrink-0 text-primary shadow-sm">
+                <span className="material-symbols-outlined text-[22px]">table_restaurant</span>
               </div>
-              <p className="text-xs text-[#1B1C1A] truncate mt-0.5">
-                {session.tableNumber} • Waiter: <span className="font-bold text-primary">{session.waiterName || 'Rahul S.'}</span>
-              </p>
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <span className="relative flex h-2 w-2 flex-shrink-0">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-600 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600"></span>
+                  </span>
+                  <span className="text-[11px] font-bold text-emerald-700 tracking-wide uppercase">
+                    Session Open
+                  </span>
+                </div>
+                <p className="text-xs text-[#1B1C1A] truncate mt-0.5">
+                  {session.tableNumber} • Waiter: <span className="font-bold text-primary">{session.waiterName || 'Rahul S.'}</span>
+                </p>
+              </div>
             </div>
-          </div>
 
-          <button
-            type="button"
-            onClick={() => handlePing('ASSISTANCE')}
-            disabled={isCalling}
-            className="bg-surface-lowest text-[#594139] hover:text-primary px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm flex items-center gap-1 active:scale-95 transition-transform flex-shrink-0 border border-hairline touch-manipulation"
-          >
-            <span className="material-symbols-outlined text-[15px] text-emerald-600">wifi_calling_3</span>
-            <span>{isCalling ? 'Pinging...' : 'Ping'}</span>
-          </button>
+            <button
+              type="button"
+              onClick={() => handlePing('ASSISTANCE')}
+              disabled={isCalling}
+              className="bg-surface-lowest text-[#594139] hover:text-primary px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm flex items-center gap-1 active:scale-95 transition-transform flex-shrink-0 border border-hairline touch-manipulation cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[15px] text-emerald-600">wifi_calling_3</span>
+              <span>{isCalling ? 'Pinging...' : 'Ping'}</span>
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Assistance Selection Modal */}
       {showOptionsModal && (
