@@ -42,8 +42,8 @@ export const TableSessionHeader: React.FC<TableSessionHeaderProps> = ({
 
   return (
     <>
-      {/* Sticky Brand & Table Bar (Sits cleanly under top OS bar) */}
-      <header className="sticky top-10 w-full z-30 bg-[#FAF8F5]/95 backdrop-blur-xl border-b border-hairline shadow-[0_1px_8px_rgba(60,40,25,0.04)]">
+      {/* Sticky Brand & Table Bar */}
+      <header className="sticky top-0 w-full z-30 bg-[#FAF8F5]/95 backdrop-blur-xl border-b border-hairline shadow-[0_1px_8px_rgba(60,40,25,0.04)]">
         <div className="max-w-[480px] mx-auto h-14 px-4 flex items-center justify-between gap-2">
           {/* Brand + Session Meta */}
           <div className="flex items-center gap-2.5 min-w-0">

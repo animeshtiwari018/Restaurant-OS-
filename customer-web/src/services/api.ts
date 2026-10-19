@@ -157,4 +157,50 @@ export const billingApi = {
   },
 };
 
+// Staff Authentication Services
+export const authApi = {
+  async staffLogin(credentials: { email: string; password: string }) {
+    const res = await apiClient.post('/auth/login', credentials);
+    return res.data?.data || res.data;
+  },
+
+  async getStaffProfile() {
+    const res = await apiClient.get('/auth/me');
+    return res.data?.data || res.data;
+  },
+};
+
+// Client-side Staff Session Helpers
+export const staffAuth = {
+  setSession(token: string, staff: { id: string; name: string; email: string; role: string }) {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem('restro_staff_token', token);
+    localStorage.setItem('restro_staff_user', JSON.stringify(staff));
+    // Set cookie for Next.js Route Guard Middleware (expires in 24h)
+    document.cookie = `staff_token=${encodeURIComponent(token)}; path=/; max-age=86400; SameSite=Lax`;
+  },
+
+  clearSession() {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem('restro_staff_token');
+    localStorage.removeItem('restro_staff_user');
+    document.cookie = 'staff_token=; path=/; max-age=0; SameSite=Lax';
+  },
+
+  getUser(): { id: string; name: string; email: string; role: string } | null {
+    if (typeof window === 'undefined') return null;
+    try {
+      const stored = localStorage.getItem('restro_staff_user');
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  },
+
+  getToken(): string | null {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem('restro_staff_token');
+  },
+};
+
 export default apiClient;

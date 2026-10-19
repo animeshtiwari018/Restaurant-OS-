@@ -186,8 +186,8 @@ export const KDSBoard: React.FC = () => {
 
   return (
     <div className="w-full min-h-screen bg-[#FAF7F2] text-[#1C1917] flex flex-col font-sans selection:bg-primary/20">
-      {/* Top KDS Control Header */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-hairline px-6 py-3.5 shadow-sm">
+      {/* Top KDS Control Bar */}
+      <header className="bg-white rounded-3xl border border-hairline px-6 py-3.5 shadow-sm mb-4">
         <div className="max-w-[1920px] mx-auto flex flex-col xl:flex-row items-center justify-between gap-4">
           {/* Brand & Chef Badge */}
           <div className="flex items-center gap-4 w-full xl:w-auto justify-between xl:justify-start">

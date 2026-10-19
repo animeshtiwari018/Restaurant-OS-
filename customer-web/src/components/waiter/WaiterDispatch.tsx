@@ -177,9 +177,9 @@ export const WaiterDispatch: React.FC = () => {
   const readyOrders = orders.filter((o) => o.status === 'READY');
 
   return (
-    <div className="w-full max-w-[480px] mx-auto min-h-screen bg-surface flex flex-col font-sans pb-16">
-      {/* Waiter Header */}
-      <header className="sticky top-0 z-30 bg-[#FAF8F5]/95 backdrop-blur-md border-b border-hairline p-4">
+    <div className="w-full max-w-[540px] mx-auto flex flex-col font-sans pb-16">
+      {/* Waiter Shift Header Card */}
+      <div className="bg-surface-lowest rounded-3xl border border-hairline p-4 shadow-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-primary text-white flex items-center justify-center font-bold shadow-sm">
@@ -219,7 +219,7 @@ export const WaiterDispatch: React.FC = () => {
             <p className="text-[10px] text-emerald-800 uppercase font-bold">Ready Pickup</p>
           </div>
         </div>
-      </header>
+      </div>
 
       {/* Floating Alert Banner */}
       {notification && (
