@@ -10,6 +10,11 @@ export const STAFF_ROLES = Object.freeze({
     KITCHEN: 'KITCHEN'
 });
 
+export const STAFF_STATUS = Object.freeze({
+    ACTIVE: 'ACTIVE',
+    INACTIVE: 'INACTIVE'
+});
+
 export const TABLE_STATUS = Object.freeze({
     AVAILABLE: 'AVAILABLE',
     OCCUPIED: 'OCCUPIED',
