@@ -17,6 +17,8 @@ build/
 # Frontend application (Customer Web)
 # customer-web/
 
+
+instructions.md
 # Agent skills
 .agents/skills/
 skills/
