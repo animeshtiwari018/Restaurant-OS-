@@ -23,3 +23,8 @@ instructions.md
 .agents/skills/
 skills/
 **/skills/
+
+# MCP configuration (contains API keys)
+.agents/mcp_config.json
+mcp_config.json
+**/mcp_config.json
