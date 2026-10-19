@@ -16,6 +16,25 @@ module.exports = {
           fixed: "#FFDBCF",
           dim: "#FFB59C",
         },
+        secondary: {
+          DEFAULT: "#9B4500",
+          container: "#FD8A42",
+          fixed: "#FFDBCA",
+          "fixed-dim": "#FFB68E",
+        },
+        "secondary-container": "#FD8A42",
+        "on-secondary-container": "#682C00",
+        "secondary-fixed": "#FFDBCA",
+        tertiary: {
+          DEFAULT: "#006B2C",
+          container: "#00873A",
+          fixed: "#7FFC97",
+          "fixed-dim": "#62DF7D",
+        },
+        "tertiary-fixed": "#7FFC97",
+        "on-tertiary": "#FFFFFF",
+        "on-tertiary-fixed": "#002109",
+        "tertiary-container": "#00873A",
         surface: {
           DEFAULT: "#FAF8F5", // Warm Cream
           cream: "#FAF7F2",
@@ -27,10 +46,15 @@ module.exports = {
           variant: "#E4E2DF",
           dim: "#DBD7CE",
         },
+        "surface-container": "#EFEEEB",
+        "surface-container-low": "#F5F3F0",
+        "surface-container-lowest": "#FFFFFF",
+        "surface-container-high": "#EAE8E5",
+        "surface-container-highest": "#E4E2DF",
         hairline: "#F0ECE4",
         outline: {
           DEFAULT: "#8D7168",
-          variant: "#F0ECE4",
+          variant: "#E1BFB5",
           subtle: "#E8E3DA",
         },
         emerald: {
@@ -47,6 +71,8 @@ module.exports = {
           surface: "#1B1C1A",
           surfaceVariant: "#594139",
         },
+        "on-surface": "#1B1C1A",
+        "on-surface-variant": "#594139",
       },
       borderRadius: {
         "2xl": "1rem", // 16px - inner cards/buttons
