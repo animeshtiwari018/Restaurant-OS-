@@ -12,6 +12,7 @@ import kitchenRouter from './routes/kitchen.routes.js';
 import reservationRouter from './routes/reservation.routes.js';
 import billingRouter from './routes/billing.routes.js';
 import sessionRouter from './routes/session.routes.js';
+import adminRouter from './routes/admin.routes.js';
 
 // Middlewares
 import errorHandler from './middlewares/error.middleware.js';
@@ -54,6 +55,7 @@ app.use('/api/v1/orders', orderRouter);
 app.use('/api/v1/kitchen', kitchenRouter);
 app.use('/api/v1/reservations', reservationRouter);
 app.use('/api/v1/billing', billingRouter);
+app.use('/api/v1/admin', adminRouter);
 
 // Global Centralized Error Handler
 app.use(errorHandler);
