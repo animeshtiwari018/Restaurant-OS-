@@ -30,10 +30,14 @@ function CustomerBottomNav() {
                 <span className="material-symbols-outlined text-[19px]">shopping_basket</span>
               </div>
               <div className="flex flex-col min-w-0 leading-tight">
-                <div className="flex items-center gap-1.5 font-display font-bold text-[13px] text-white tracking-tight truncate">
-                  <span>{totalItems} {totalItems === 1 ? 'Dish' : 'Dishes'}</span>
-                  <span className="text-stone-400 text-[10px]">•</span>
-                  <span className="text-white font-extrabold">{formatRupees(totalPaise)}</span>
+                <div className="flex items-baseline gap-1.5 tracking-tight truncate">
+                  <span className="text-stone-300 font-medium text-xs">
+                    {totalItems} {totalItems === 1 ? 'Dish' : 'Dishes'}
+                  </span>
+                  <span className="text-stone-500 text-[11px]">•</span>
+                  <span className="font-display font-black text-[15px] text-white tracking-tight drop-shadow-sm">
+                    {formatRupees(totalPaise)}
+                  </span>
                 </div>
                 <span className="text-[10.5px] font-semibold text-[#22C55E] tracking-tight mt-0.5">
                   Taxes &amp; Table Cover Incl.
