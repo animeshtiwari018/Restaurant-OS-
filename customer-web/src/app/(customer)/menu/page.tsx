@@ -154,7 +154,7 @@ const CATEGORIES: MenuCategory[] = [
 export default function CustomerMenuPage() {
   const searchParams = useSearchParams();
   const [items, setItems] = useState<MenuItem[]>(DEFAULT_MENU_ITEMS);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string>('ALL');
   const [selectedDiet, setSelectedDiet] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
@@ -233,7 +233,7 @@ export default function CustomerMenuPage() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading && items.length === 0) {
     return <MenuSkeleton />;
   }
 
