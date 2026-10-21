@@ -182,8 +182,18 @@ export const billingApi = {
 
 // Staff Authentication Services
 export const authApi = {
-  async staffLogin(credentials: { email: string; password: string }) {
+  async staffLogin(credentials: { email?: string; password?: string; pin?: string; staff_id?: string }) {
     const res = await apiClient.post('/auth/login', credentials);
+    return res.data?.data || res.data;
+  },
+
+  async getOnDutyStaff(): Promise<any[]> {
+    const res = await apiClient.get('/auth/staff/on-duty');
+    return res.data?.data || res.data || [];
+  },
+
+  async waiterPinLogin(staffId: string, pin: string) {
+    const res = await apiClient.post('/auth/login', { staff_id: staffId, pin });
     return res.data?.data || res.data;
   },
 
