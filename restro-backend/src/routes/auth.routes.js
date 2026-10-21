@@ -3,6 +3,7 @@ import {
     registerStaff,
     loginStaff,
     getStaffProfile,
+    getOnDutyStaff,
     adminProvisionStaff
 } from '../controllers/auth.controller.js';
 import { verifyStaffToken, authorizeRoles } from '../middlewares/auth.middleware.js';
@@ -10,9 +11,10 @@ import { STAFF_ROLES } from '../constants.js';
 
 const router = Router();
 
-// Public authentication & registration (with privilege escalation protection)
+// Public authentication & registration
 router.post('/login', loginStaff);
 router.post('/staff/login', loginStaff);
+router.get('/staff/on-duty', getOnDutyStaff);
 router.post('/register', registerStaff);
 router.post('/staff/register', registerStaff);
 
