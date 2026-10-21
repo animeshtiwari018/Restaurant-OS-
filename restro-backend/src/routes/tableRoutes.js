@@ -20,6 +20,10 @@ router.route('/')
 // QR generation & session verification with rate limiting
 router.get('/generate-qr/:tableNumber', qrVerificationLimiter, getTableQRCode);
 router.get('/verify-session', qrVerificationLimiter, verifyTableToken, verifyAndGetSession);
+router.get('/qr/:token', (req, res, next) => {
+    req.query.token = req.params.token;
+    next();
+}, qrVerificationLimiter, verifyTableToken, verifyAndGetSession);
 
 // Session reconnection / state hydration (also accessible via /api/v1/tables/sessions/current)
 router.get('/sessions/current', sessionRateLimiter, getCurrentSessionState);
