@@ -61,6 +61,21 @@ export const menuApi = {
     const res = await apiClient.get(`/menu/items/${id}`);
     return res.data?.data || res.data;
   },
+
+  async createMenuItem(payload: any): Promise<MenuItem> {
+    const res = await apiClient.post('/menu/items', payload);
+    return res.data?.data || res.data;
+  },
+
+  async updateMenuItem(id: string, payload: any): Promise<MenuItem> {
+    const res = await apiClient.put(`/menu/items/${id}`, payload);
+    return res.data?.data || res.data;
+  },
+
+  async toggleItemAvailability(id: string, is_available: boolean): Promise<MenuItem> {
+    const res = await apiClient.patch(`/menu/items/${id}`, { is_available });
+    return res.data?.data || res.data;
+  },
 };
 
 // Dining Session API Services
