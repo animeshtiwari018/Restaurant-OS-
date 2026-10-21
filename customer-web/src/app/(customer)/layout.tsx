@@ -19,26 +19,32 @@ function CustomerBottomNav() {
     <>
       {/* Floating Cart Pill (Shows on menu when items added, links to /my-order) */}
       {totalItems > 0 && isMenu && (
-        <div className="fixed bottom-16 left-0 right-0 max-w-[480px] mx-auto z-40 px-3 py-2 pointer-events-none">
+        <div className="fixed bottom-[68px] left-0 right-0 max-w-[480px] mx-auto z-40 px-3.5 pointer-events-none animate-in slide-in-from-bottom-3 duration-200">
           <Link
             href="/my-order"
-            className="pointer-events-auto bg-[#1B1C1A] text-white rounded-2xl p-3 shadow-xl flex items-center justify-between border border-white/10 active:scale-[0.98] transition-transform"
+            className="pointer-events-auto w-full bg-[#232323] text-white rounded-[22px] px-3 py-2.5 shadow-2xl flex items-center justify-between border border-white/10 active:scale-[0.98] transition-all duration-150"
           >
-            <div className="flex items-center gap-2.5 pl-1">
-              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-display font-bold text-xs shadow-sm">
-                {totalItems}
+            {/* Left Info: Basket icon + Dishes Count & Total + Green tax disclaimer */}
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-9 h-9 rounded-xl bg-[#342823] flex items-center justify-center text-[#E6C3B1] flex-shrink-0 shadow-inner">
+                <span className="material-symbols-outlined text-[19px]">shopping_basket</span>
               </div>
-              <div className="flex flex-col">
-                <span className="font-display font-bold text-xs text-white">
-                  {formatRupees(totalPaise)}
+              <div className="flex flex-col min-w-0 leading-tight">
+                <div className="flex items-center gap-1.5 font-display font-bold text-[13px] text-white tracking-tight truncate">
+                  <span>{totalItems} {totalItems === 1 ? 'Dish' : 'Dishes'}</span>
+                  <span className="text-stone-400 text-[10px]">•</span>
+                  <span className="text-white font-extrabold">{formatRupees(totalPaise)}</span>
+                </div>
+                <span className="text-[10.5px] font-semibold text-[#22C55E] tracking-tight mt-0.5">
+                  Taxes &amp; Table Cover Incl.
                 </span>
-                <span className="text-[10px] text-stone-300">Review Your Order & Place</span>
               </div>
             </div>
 
-            <div className="h-8 px-3 rounded-xl bg-primary text-white font-display font-bold text-xs flex items-center gap-1 shadow-sm">
-              <span>View Order</span>
-              <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+            {/* Right Action: Terracotta CTA Button */}
+            <div className="h-9 px-3.5 rounded-xl bg-[#B3390B] hover:bg-[#9E320A] text-white font-display font-bold text-xs flex items-center gap-1.5 shadow-md flex-shrink-0 active:scale-95 transition-transform">
+              <span>Review Order</span>
+              <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
             </div>
           </Link>
         </div>
