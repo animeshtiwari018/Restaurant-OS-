@@ -52,10 +52,47 @@
   --color-on-primary: #FFFFFF;
   --color-on-surface: #1B1C1A;
   --color-on-surface-variant: #594139;
+  --color-inverse-surface: #30312F;
+  --color-inverse-on-surface: #F2F0ED;
+  --color-error: #BA1A1A;
+  --color-error-container: #FFDAD6;
+  --color-on-error: #FFFFFF;
+  --color-on-error-container: #93000A;
+
+  --spacing-space-xs: 0.25rem;
+  --spacing-space-sm: 0.5rem;
+  --spacing-space-md: 0.75rem;
+  --spacing-space-lg: 1rem;
+  --spacing-space-xl: 1.5rem;
+  --spacing-space-2xl: 2rem;
+
+  --font-size-label-sm: 11px;
+  --font-size-label-md: 12px;
+  --font-size-label-lg: 14px;
+  --font-size-body-sm: 13px;
+  --font-size-body-md: 14px;
+  --font-size-body-lg: 16px;
+  --font-size-headline-sm: 18px;
+  --font-size-headline-md: 20px;
+  --font-size-headline-lg: 24px;
+  --font-size-price-md: 15px;
+  --font-size-price-lg: 18px;
+  --font-size-display-lg: 36px;
 
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-display: 'Plus Jakarta Sans', system-ui, sans-serif;
   --font-headline: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-headline-sm: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-headline-md: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-headline-lg: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-label-sm: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-label-md: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-label-lg: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-body-sm: 'Inter', system-ui, sans-serif;
+  --font-body-md: 'Inter', system-ui, sans-serif;
+  --font-body-lg: 'Inter', system-ui, sans-serif;
+  --font-price-md: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-price-lg: 'Plus Jakarta Sans', system-ui, sans-serif;
 
   --radius-2xl: 1rem;
   --radius-3xl: 1.5rem;
