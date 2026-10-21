@@ -19,10 +19,10 @@ function CustomerBottomNav() {
     <>
       {/* Floating Cart Pill (Shows on menu when items added, links to /my-order) */}
       {totalItems > 0 && isMenu && (
-        <div className="fixed bottom-[68px] left-0 right-0 max-w-[480px] mx-auto z-40 px-3.5 pointer-events-none animate-in slide-in-from-bottom-3 duration-200">
+        <div className="fixed bottom-[68px] left-0 right-0 z-40 px-4 pointer-events-none flex justify-center animate-in slide-in-from-bottom-3 duration-200">
           <Link
             href="/my-order"
-            className="pointer-events-auto w-full bg-[#232323] text-white rounded-[22px] px-3 py-2.5 shadow-2xl flex items-center justify-between border border-white/10 active:scale-[0.98] transition-all duration-150"
+            className="pointer-events-auto w-full max-w-[370px] bg-[#232323] text-white rounded-[22px] px-3 py-2 shadow-2xl flex items-center justify-between border border-white/10 active:scale-[0.98] transition-all duration-150"
           >
             {/* Left Info: Basket icon + Dishes Count & Total + Green tax disclaimer */}
             <div className="flex items-center gap-2.5 min-w-0">
@@ -45,10 +45,10 @@ function CustomerBottomNav() {
               </div>
             </div>
 
-            {/* Right Action: Terracotta CTA Button */}
-            <div className="h-9 px-3.5 rounded-xl bg-[#B3390B] hover:bg-[#9E320A] text-white font-display font-bold text-xs flex items-center gap-1.5 shadow-md flex-shrink-0 active:scale-95 transition-transform">
-              <span>Review Order</span>
-              <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
+            {/* Right Action: Compact CTA Button */}
+            <div className="h-8 px-2.5 rounded-xl bg-[#B3390B] hover:bg-[#9E320A] text-white font-display font-extrabold text-[11.5px] flex items-center gap-1 shadow-sm flex-shrink-0 active:scale-95 transition-transform">
+              <span>View Cart</span>
+              <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
             </div>
           </Link>
         </div>
