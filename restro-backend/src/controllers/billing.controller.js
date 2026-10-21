@@ -1,7 +1,8 @@
 import { Bill } from '../models/Bill.js';
 import { Order } from '../models/Order.js';
 import { TableSession } from '../models/TableSession.js';
-import { BILL_STATUS, ORDER_STATUS, TABLE_SESSION_STATUS, PAYMENT_STATUS, PAYMENT_METHODS } from '../constants.js';
+import { Table } from '../models/Table.js';
+import { BILL_STATUS, ORDER_STATUS, TABLE_SESSION_STATUS, TABLE_STATUS, PAYMENT_STATUS, PAYMENT_METHODS } from '../constants.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiError } from '../utils/apiError.js';
 import { ApiResponse } from '../utils/apiResponse.js';
@@ -44,7 +45,8 @@ export const getOrCreateBillForSession = asyncHandler(async (req, res) => {
 
     if (!bill) {
         const count = await Bill.countDocuments();
-        const billNumber = `INV-${new Date().getFullYear()}-${1001 + count}`;
+        const entropy = Math.floor(100 + Math.random() * 900);
+        const billNumber = `INV-${new Date().getFullYear()}-${1001 + count}-${entropy}`;
 
         bill = await Bill.create({
             bill_number: billNumber,
@@ -137,6 +139,17 @@ export const recordPayment = asyncHandler(async (req, res) => {
     // Check if fully settled
     if (bill.paid_amount_paise >= bill.final_total_paise) {
         bill.status = BILL_STATUS.SETTLED;
+
+        // Release session and reset table to AVAILABLE
+        const session = await TableSession.findById(bill.table_session_id);
+        if (session && session.status !== TABLE_SESSION_STATUS.CLOSED) {
+            session.status = TABLE_SESSION_STATUS.CLOSED;
+            session.closed_at = new Date();
+            await session.save();
+            await Table.findByIdAndUpdate(session.table_id, {
+                status: TABLE_STATUS.AVAILABLE
+            });
+        }
     } else {
         bill.status = BILL_STATUS.PARTIALLY_PAID;
     }
@@ -145,6 +158,52 @@ export const recordPayment = asyncHandler(async (req, res) => {
 
     return res.status(200).json(
         new ApiResponse(200, bill, `Payment of ₹${(payAmount / 100).toFixed(2)} recorded. Bill status: ${bill.status}`)
+    );
+});
+
+/**
+ * Customer / Session Direct Settlement (Digital checkout from table)
+ * Route: POST /api/v1/billing/sessions/:sessionId/settle
+ */
+export const settleSessionBill = asyncHandler(async (req, res) => {
+    const { sessionId } = req.params;
+    const { paymentMethod, amountPaise } = req.body;
+
+    const session = await TableSession.findById(sessionId);
+    if (!session) {
+        throw new ApiError(404, 'Table session not found.');
+    }
+
+    let bill = await Bill.findOne({ table_session_id: session._id });
+    if (!bill) {
+        throw new ApiError(404, 'Bill not found for this session.');
+    }
+
+    const payAmount = parseInt(amountPaise, 10) || bill.final_total_paise;
+    const method = paymentMethod || PAYMENT_METHODS.UPI;
+
+    bill.payments.push({
+        payment_method: method,
+        amount_paise: payAmount,
+        status: PAYMENT_STATUS.SUCCESS,
+        paid_at: new Date()
+    });
+
+    bill.paid_amount_paise += payAmount;
+    bill.status = BILL_STATUS.SETTLED;
+    await bill.save();
+
+    // Close session and free physical table
+    session.status = TABLE_SESSION_STATUS.CLOSED;
+    session.closed_at = new Date();
+    await session.save();
+
+    await Table.findByIdAndUpdate(session.table_id, {
+        status: TABLE_STATUS.AVAILABLE
+    });
+
+    return res.status(200).json(
+        new ApiResponse(200, bill, 'Session bill settled and table closed successfully.')
     );
 });
 
