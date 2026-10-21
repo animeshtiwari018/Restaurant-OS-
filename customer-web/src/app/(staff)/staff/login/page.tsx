@@ -135,6 +135,16 @@ export default function StaffLoginPage() {
           <p className="text-xs text-stone-400">
             Secure operations access for Waiters, Chefs, and Floor Managers
           </p>
+          <a
+            href="/waiter/login"
+            className="mt-1 flex items-center justify-between w-full p-2.5 px-3.5 rounded-xl bg-[#A73400]/20 border border-[#A73400]/50 text-amber-200 hover:bg-[#A73400]/30 transition-all text-xs font-bold"
+          >
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-[18px] text-[#A73400]">tablet_android</span>
+              <span>Switch to Waiter POS Handheld Terminal</span>
+            </div>
+            <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+          </a>
         </div>
 
         {/* Error Alert */}
