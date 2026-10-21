@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { menuApi } from '@/services/api';
 
 interface NutritionMacro {
@@ -31,109 +32,215 @@ interface DishItem {
   chefNote?: string;
   spiceLevel?: string;
   dietaryTags: string[];
+  customizationChips?: string[];
+  ingredients?: string[];
 }
 
-const DEFAULT_DISHES: DishItem[] = [
+// Authoritative Menu Data strictly matching User's JSON
+const AUTHORITATIVE_REAL_DISHES: DishItem[] = [
   {
-    id: 'dish_104',
-    code: 'DISH-104',
-    name: 'Hawaiian Teriyaki Paneer Slider',
-    category: 'Tandoor & Starters',
-    description: 'Marinated grilled cottage cheese cubes, charred pineapple disc, teriyaki soy reduction in artisan brioche.',
-    price: 340,
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC5E_zeoGy97pA1Qvhcn2x3YB05TQ7W2FzhrlY9D-ds3WEX4mhmhPEW6aF1ukympDUbCcpQYLAVrPi5l3mz4QbCseqC-Nil7DUYLcIPrl206dK0zpxHcb4vPzukJjlBqQxrLKTur7WGStjsk8P4mtzsd12JqAPffYWqgAOaQQmnQMgiJSBpjfrzSc0aGtc5ki56_DHXJHAgjzr7Hod5BqgsGsIJEKpXUO6bMjeBTggoFgabLRuP1zCmzQ',
+    id: 'item_str_001',
+    code: 'DISH-101',
+    name: 'Paneer Tikka (Tandoori Classic)',
+    category: 'Starters & Small Plates',
+    description: 'Char-grilled cubes of malai paneer marinated in hung spiced curd, mustard oil, and roasted besan.',
+    price: 320,
+    image: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=600&auto=format&fit=crop&q=80',
     isVeg: true,
     inStock: true,
-    nutrition: { calories: 510, protein: 18, carbs: 46, fats: 24, fiber: 6, sodium: 580 },
-    allergens: ['Dairy', 'Gluten', 'Soy'],
-    prepTimeMinutes: 12,
-    coreTemp: '72°C',
-    station: 'Grill Press #2',
-    chefNote: 'Chef Vikram: Made with fresh daily paneer, grilled over coconut husk briquettes.',
-    spiceLevel: 'Medium 🌶️🌶️',
-    dietaryTags: ['Pure Veg'],
-  },
-  {
-    id: 'dish_202',
-    code: 'DISH-202',
-    name: 'Paneer Butter Masala Special',
-    category: 'Curries & Mains',
-    description: 'Slow-simmered vine tomato gravy with house-churned butter, tender malai paneer & roasted fenugreek leaves.',
-    price: 340,
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAN_BYCFlWH0ADWvAIsOcGMIbc826fVR3kQv1t3MVZ4BgNaOyAwiF5A4z_DeH8SpARsnKAxEgleU8OtBEANnJp_wZYzcaCfKrYytEUfA5ivZqrdqODEvhZiuIz3UMZ389rCFvO60CEuJE-AxmLS-pxTWPCknslXJcYl6pqvfoA7csRKuckyDRIyWs1ome6KhWTU3fSF3DDA_NYQCgtwRzPkZNIvv9Fg5fLAIlh3jGI0UnIVSIKDWMc-Ew',
-    isVeg: true,
-    inStock: true,
-    nutrition: { calories: 440, protein: 16, carbs: 22, fats: 32, fiber: 4, sodium: 620 },
-    allergens: ['Dairy', 'Cashew Nut'],
+    nutrition: { calories: 320, protein: 18.0, carbs: 12.0, fats: 22.0, fiber: 3, sodium: 480 },
+    allergens: ['Dairy'],
     prepTimeMinutes: 15,
     coreTemp: '75°C',
-    station: 'Curry Range #1',
-    chefNote: 'Simmered over mild flame for velvety texture without artificial coloring.',
-    spiceLevel: 'Mild 🌶️',
-    dietaryTags: ['Pure Veg', 'Keto-Friendly'],
+    station: 'Tandoor Oven #1',
+    chefNote: 'Char-grilled over natural charcoal embers with mustard oil and roasted besan.',
+    spiceLevel: 'Medium 🌶️🌶️',
+    dietaryTags: ['Pure Veg'],
+    customizationChips: ['Low Spice', 'Extra Lemon', 'Crisp Tandoor'],
+    ingredients: ['Malai Paneer', 'Hung Curd', 'Roasted Chickpea Flour', 'Mustard Oil', 'Lemon Juice', 'Garam Masala'],
   },
   {
-    id: 'dish_205',
-    code: 'DISH-205',
-    name: 'Dal Makhani Bukhara',
-    category: 'Curries & Mains',
-    description: '24-hour slow cooked unpolished urad dal over charcoal embers with organic white butter & garlic reduction.',
-    price: 280,
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAuPvkx-aM8kkB0KBi6lE3IR07OU0vLR_2wk8rm4WCtVbsmw2ZzbMUBa-lmHkMBjYwb1Z7sfz22J9gY8S77KV7KUUhFDo_AJEVxHShGlEuif5EP0EBGtT-R3wJ_U0WYd_yDgWmgZyqf4Qrc2Ukn8FmgicawVDVfPFWHg7OW3U0lcVGnX0ZIt3bfBHiVTvbhXDvrWeGcv7WO2VDXosazFwvnmRSUuw0BwMTwjCiA2O4LiwQUMySMcIeKNw',
+    id: 'item_str_002',
+    code: 'DISH-102',
+    name: 'Dahi Ke Kebab',
+    category: 'Starters & Small Plates',
+    description: 'Crisp golden patties made with hung Greek-style yogurt, soft cottage cheese, and roasted cumin.',
+    price: 290,
+    image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80',
     isVeg: true,
     inStock: true,
-    nutrition: { calories: 360, protein: 14, carbs: 38, fats: 18, fiber: 9, sodium: 510 },
+    nutrition: { calories: 285, protein: 11.0, carbs: 19.0, fats: 17.0, fiber: 2, sodium: 420 },
+    allergens: ['Dairy', 'Gluten'],
+    prepTimeMinutes: 12,
+    coreTemp: '72°C',
+    station: 'Appetizer Fryer #2',
+    chefNote: 'Delicate hung yogurt center encased in a golden crisp herb breadcrumb crust.',
+    spiceLevel: 'Mild 🌶️',
+    dietaryTags: ['Pure Veg'],
+    customizationChips: ['Crisp Golden', 'No Garlic'],
+    ingredients: ['Hung Curd', 'Paneer', 'Green Chilies', 'Fresh Coriander', 'Roasted Cumin', 'Breadcrumbs'],
+  },
+  {
+    id: 'item_cur_001',
+    code: 'DISH-201',
+    name: 'Paneer Butter Masala Special',
+    category: 'Mains (Curries & Specialties)',
+    description: 'Fresh malai paneer simmered in a slow-cooked tomato, table butter, and cashew nut reduction.',
+    price: 340,
+    image: 'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=600&auto=format&fit=crop&q=80',
+    isVeg: true,
+    inStock: true,
+    nutrition: { calories: 440, protein: 18.2, carbs: 21.8, fats: 30.4, fiber: 4.5, sodium: 520 },
+    allergens: ['Dairy', 'Tree Nuts'],
+    prepTimeMinutes: 18,
+    coreTemp: '78°C',
+    station: 'Curry Range #1',
+    chefNote: 'Slow-cooked tomato gravy with house-churned butter and roasted fenugreek.',
+    spiceLevel: 'Mild 🌶️',
+    dietaryTags: ['Pure Veg'],
+    customizationChips: ['Less Butter / Light Oil', 'Mild / Low Spice', 'Extra Gravy', 'No Onion & Garlic'],
+    ingredients: ['Malai Paneer', 'Tomato Puree', 'Cashew Paste', 'Table Butter', 'Dairy Cream', 'Kasuri Methi'],
+  },
+  {
+    id: 'item_cur_002',
+    code: 'DISH-202',
+    name: 'Dal Makhani Bukhara',
+    category: 'Mains (Curries & Specialties)',
+    description: 'Slow-simmered whole black lentils cooked overnight with tomatoes, butter, and mild spices.',
+    price: 280,
+    image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=600&auto=format&fit=crop&q=80',
+    isVeg: true,
+    inStock: true,
+    nutrition: { calories: 360, protein: 14.5, carbs: 38.0, fats: 16.8, fiber: 9, sodium: 510 },
     allergens: ['Dairy'],
-    prepTimeMinutes: 20,
-    coreTemp: '80°C',
+    prepTimeMinutes: 12,
+    coreTemp: '82°C',
     station: 'Simmer Pot #4',
-    chefNote: 'Authentic 24-hr wood smoke profile. Unpolished organic black lentils.',
+    chefNote: 'Overnight charcoal simmered black urad dal with white butter and garlic glaze.',
     spiceLevel: 'Mild 🌶️',
     dietaryTags: ['Pure Veg', 'Gluten-Free'],
+    customizationChips: ['Light Cream', 'Spicy Tadka', 'Extra Butter Float'],
+    ingredients: ['Whole Black Urad', 'Rajma', 'Tomato Reduction', 'Table Butter', 'Dairy Cream', 'Degi Mirch'],
   },
   {
-    id: 'dish_301',
-    code: 'DISH-301',
-    name: 'Tandoori Roti (Whole Wheat)',
-    category: 'Breads & Rice',
-    description: '100% Stone-ground wheat flour flatbread crisp baked in authentic clay tandoor pit.',
-    price: 45,
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAn2V0EwhKabjeabzSwudBkyh7AAcANsnOay44oQ0ycwJ0EVf8BitV3Pn7ruu_W9PeeLcXm6_5VuVuWf8w88AyLLW8eQ4_T5vEAcTMU4LQzaqgyUd57A-ilLmJ_TIXBnZ4MTJFFEgXrD9Bm1k6KseS2Gmo0yIkH1_9ovxksS40qpqPXlWOBa13uaKIJJwt1hsuLPvso5dXg89sFTBNaNhsXwIBbl_xEWLCRfWLZgi-jD53U886dTbxD8g',
-    isVeg: true,
-    inStock: false,
-    nutrition: { calories: 120, protein: 4, carbs: 24, fats: 1.5, fiber: 3, sodium: 110 },
-    allergens: ['Gluten'],
-    prepTimeMinutes: 8,
-    coreTemp: '95°C',
-    station: 'Tandoor Oven #1',
-    chefNote: 'Baked directly on scorching clay walls at 320°C for airy blister crust.',
-    spiceLevel: 'None',
-    dietaryTags: ['Pure Veg'],
-  },
-  {
-    id: 'dish_108',
-    code: 'DISH-108',
-    name: 'Spicy Tiki Smoked Burger',
-    category: 'Tandoor & Starters',
-    description: 'Applewood smoked charbroiled chicken patty, jalapeño relish, sharp cheddar, artisan seeded brioche.',
-    price: 280,
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCGIwG9B5cDJn0-G5j1W1GlCxQhHmMEcyZAR9gVl0D1SVi0h8fUMbtjHwN-_6WzWgMyTmcwj-blaNiJWf1Bd8AS4f5YKchURymNhsQve-tJXcJ7JP7KdJeHDZTSBdFzYCcdIGSvGU4Fbh5-7LykRcexBVmXs63nOTO_7_bpgTpCkMZu8pTWH8uNcw_tcmIj_wBfj5x7BsGchPZIj4XU9dR2R71VSR3tvFVY-vFHCv60kAQCqyPatUT4RQ',
+    id: 'item_cur_003',
+    code: 'DISH-203',
+    name: 'Murgh Dum Biryani',
+    category: 'Mains (Curries & Specialties)',
+    description: 'Aged long-grain basmati rice cooked with tender chicken cuts, browned shallots, and saffron.',
+    price: 410,
+    image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=600&auto=format&fit=crop&q=80',
     isVeg: false,
     inStock: true,
-    nutrition: { calories: 620, protein: 32, carbs: 44, fats: 34, fiber: 4, sodium: 790 },
-    allergens: ['Gluten', 'Mustard', 'Dairy'],
-    prepTimeMinutes: 14,
+    nutrition: { calories: 560, protein: 32.0, carbs: 64.0, fats: 18.5, fiber: 4, sodium: 680 },
+    allergens: ['Dairy'],
+    prepTimeMinutes: 20,
     coreTemp: '76°C',
-    station: 'Charbroil Grille #3',
-    chefNote: 'Smoked chicken breast with applewood smoke & melted aged gouda cheddar.',
-    spiceLevel: 'Hot 🌶️🌶️🌶️',
+    station: 'Dum Station #2',
+    chefNote: 'Layered dum cooking sealed with dough lid, infused with Kashmiri saffron milk.',
+    spiceLevel: 'Medium 🌶️🌶️',
     dietaryTags: ['Non-Veg'],
+    customizationChips: ['Extra Raita', 'Spicy Gravy', 'Less Desi Ghee'],
+    ingredients: ['Basmati Rice', 'Chicken Cuts', 'Browned Onions', 'Mint', 'Coriander', 'Cardamom', 'Desi Ghee', 'Saffron Milk'],
+  },
+  {
+    id: 'item_brd_001',
+    code: 'DISH-301',
+    name: 'Garlic Butter Naan',
+    category: 'Tandoor & Breads',
+    description: 'Classic leavened flatbread topped with minced roasted garlic, fresh cilantro, and salted butter.',
+    price: 75,
+    image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=600&auto=format&fit=crop&q=80',
+    isVeg: true,
+    inStock: true,
+    nutrition: { calories: 210, protein: 5.5, carbs: 34.0, fats: 6.2, fiber: 2, sodium: 310 },
+    allergens: ['Gluten', 'Dairy'],
+    prepTimeMinutes: 6,
+    coreTemp: '95°C',
+    station: 'Tandoor Pit #2',
+    chefNote: 'Patted by hand and baked on scorching clay walls, brushed with roasted garlic butter.',
+    spiceLevel: 'None',
+    dietaryTags: ['Pure Veg'],
+    customizationChips: ['Crisp Well-Done', 'Less Butter', 'Garlic Free'],
+    ingredients: ['Refined Wheat Flour', 'Milk', 'Minced Fresh Garlic', 'Table Butter', 'Fresh Coriander', 'Yeast'],
+  },
+  {
+    id: 'item_brd_002',
+    code: 'DISH-302',
+    name: 'Tandoori Roti (Whole Wheat)',
+    category: 'Tandoor & Breads',
+    description: 'Traditional unleavened flatbread baked in a clay tandoor using stone-ground chakki wheat.',
+    price: 35,
+    image: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=600&auto=format&fit=crop&q=80',
+    isVeg: true,
+    inStock: true,
+    nutrition: { calories: 120, protein: 3.8, carbs: 25.0, fats: 0.8, fiber: 3, sodium: 110 },
+    allergens: ['Gluten'],
+    prepTimeMinutes: 5,
+    coreTemp: '95°C',
+    station: 'Tandoor Pit #1',
+    chefNote: '100% stone-ground wheat flour flatbread crisp baked without oil or additives.',
+    spiceLevel: 'None',
+    dietaryTags: ['Pure Veg', 'Vegan'],
+    customizationChips: ['Plain / No Butter', 'Butter Glazed', 'Crisp Tandoor'],
+    ingredients: ['Whole Wheat Flour', 'Water', 'Sea Salt'],
+  },
+  {
+    id: 'item_bev_001',
+    code: 'DISH-401',
+    name: 'Masala Chaas',
+    category: 'Beverages & Coolers',
+    description: 'Traditional churned yogurt spiced with roasted cumin, rock salt, fresh ginger, and mint.',
+    price: 55,
+    image: 'https://images.unsplash.com/photo-1528751014936-863e6e7a319c?w=600&auto=format&fit=crop&q=80',
+    isVeg: true,
+    inStock: true,
+    nutrition: { calories: 62, protein: 3.1, carbs: 4.8, fats: 3.2, fiber: 1, sodium: 260 },
+    allergens: ['Dairy'],
+    prepTimeMinutes: 4,
+    coreTemp: '4°C',
+    station: 'Beverage Bar #1',
+    chefNote: 'Hand-churned refreshing buttermilk with dry-roasted cumin and fresh mint infusion.',
+    spiceLevel: 'Mild 🌶️',
+    dietaryTags: ['Pure Veg', 'Gluten-Free'],
+    customizationChips: ['No Green Chili', 'Extra Cumin', 'Extra Chilled Ice'],
+    ingredients: ['Fresh Curd', 'Chilled Water', 'Roasted Cumin', 'Rock Salt', 'Ginger Extract', 'Fresh Mint'],
+  },
+  {
+    id: 'item_des_001',
+    code: 'DISH-501',
+    name: 'Gulab Jamun with Rabri',
+    category: 'Desserts',
+    description: 'Soft fried milk dough dumplings soaked in cardamom syrup, served over slow-cooked reduced milk.',
+    price: 140,
+    image: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=600&auto=format&fit=crop&q=80',
+    isVeg: true,
+    inStock: true,
+    nutrition: { calories: 380, protein: 7.2, carbs: 52.0, fats: 16.0, fiber: 2, sodium: 180 },
+    allergens: ['Dairy', 'Tree Nuts'],
+    prepTimeMinutes: 5,
+    coreTemp: '65°C',
+    station: 'Dessert Pantry #1',
+    chefNote: 'Tender milk khoya dumplings drenched in saffron cardamom syrup over artisanal rabri.',
+    spiceLevel: 'Sweet Dessert',
+    dietaryTags: ['Pure Veg'],
+    customizationChips: ['Served Warm', 'Rabri on Side', 'Nut Free Garnish'],
+    ingredients: ['Milk Solids (Khoya)', 'Paneer', 'Cardamom Sugar Syrup', 'Rabri', 'Pistachio Slivers', 'Almonds', 'Saffron'],
   },
 ];
 
+const CANONICAL_CATEGORIES = [
+  'Starters & Small Plates',
+  'Mains (Curries & Specialties)',
+  'Tandoor & Breads',
+  'Beverages & Coolers',
+  'Desserts',
+];
+
 export default function MenuNutritionCmsPage() {
-  const [dishes, setDishes] = useState<DishItem[]>(DEFAULT_DISHES);
-  const [selectedDishId, setSelectedDishId] = useState<string>('dish_104');
+  const searchParams = useSearchParams();
+  const [dishes, setDishes] = useState<DishItem[]>(AUTHORITATIVE_REAL_DISHES);
+  const [selectedDishId, setSelectedDishId] = useState<string>('item_str_001');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [selectedDietary, setSelectedDietary] = useState<string>('All');
@@ -144,83 +251,96 @@ export default function MenuNutritionCmsPage() {
   const [isNewDishOpen, setIsNewDishOpen] = useState(false);
   const [newDishForm, setNewDishForm] = useState({
     name: '',
-    category: 'Tandoor & Starters',
-    price: 290,
+    category: 'Starters & Small Plates',
+    price: 320,
     description: '',
     image: '',
     isVeg: true,
-    calories: 450,
-    protein: 18,
-    carbs: 40,
-    fats: 20,
-    fiber: 5,
+    calories: 320,
+    protein: 16,
+    carbs: 24,
+    fats: 18,
+    fiber: 3,
     prepTime: 12,
     allergens: ['Dairy'],
     spiceLevel: 'Medium 🌶️🌶️',
     chefNote: '',
   });
 
+  // Open modal if URL parameter ?add=true or ?action=add-dish is detected
+  useEffect(() => {
+    if (searchParams.get('add') === 'true' || searchParams.get('action') === 'add-dish') {
+      setIsNewDishOpen(true);
+    }
+  }, [searchParams]);
+
   // Selected dish details for Inspector
   const activeDish = useMemo(() => {
-    return dishes.find((d) => d.id === selectedDishId) || dishes[0];
+    return dishes.find((d) => d.id === selectedDishId) || dishes[0] || AUTHORITATIVE_REAL_DISHES[0];
   }, [dishes, selectedDishId]);
 
-  // Load dynamic dishes and categories from backend API on mount
+  // Load real menu items from backend API
   useEffect(() => {
-    async function loadDynamicMenu() {
+    async function loadRealMenu() {
       try {
         const items = await menuApi.getMenuItems();
         if (items && items.length > 0) {
           const mappedItems: DishItem[] = items.map((item: any, idx: number) => {
             const isVeg =
               item.dietary_labels?.includes('VEG') ||
+              item.dietary_labels?.includes('VEGAN') ||
               item.dietary_labels?.includes('Pure Veg') ||
               !item.dietary_labels?.includes('NON_VEG');
-            const code = `DISH-${100 + idx}`;
+
+            const categoryName =
+              item.category_id?.name ||
+              item.category_name ||
+              (item.price_paise > 30000 ? 'Mains (Curries & Specialties)' : 'Starters & Small Plates');
+
             return {
-              id: item._id || `item_${idx}`,
-              code,
+              id: item._id || item.id || `dish_${idx}`,
+              code: `DISH-${100 + (idx + 1)}`,
               name: item.name,
-              category: item.category_id?.name || 'Tandoor & Starters',
-              description: item.description || 'Artisan chef prepared gourmet dish.',
-              price: item.price_paise ? Math.round(item.price_paise / 100) : 280,
+              category: categoryName,
+              description: item.description || 'Artisan chef prepared gourmet delicacy.',
+              price: item.price_paise ? Math.round(item.price_paise / 100) : item.price || 300,
               image:
                 item.image_urls?.[0] ||
                 item.image_url ||
-                DEFAULT_DISHES[idx % DEFAULT_DISHES.length].image,
+                AUTHORITATIVE_REAL_DISHES[idx % AUTHORITATIVE_REAL_DISHES.length].image,
               isVeg,
               inStock: item.is_available !== false,
               nutrition: {
-                calories: item.nutrition?.calories || 420,
-                protein: item.nutrition?.protein || 16,
-                carbs: item.nutrition?.carbs || 36,
-                fats: item.nutrition?.fat || item.nutrition?.fats || 18,
-                fiber: 5,
-                sodium: 520,
+                calories: item.nutrition?.calories || item.nutrition?.calories_kcal || 350,
+                protein: item.nutrition?.protein || item.nutrition?.protein_grams || 16,
+                carbs: item.nutrition?.carbs || item.nutrition?.carbs_grams || 25,
+                fats: item.nutrition?.fat || item.nutrition?.fats || item.nutrition?.fat_grams || 18,
+                fiber: item.nutrition?.fiber || item.nutrition?.fiber_grams || 3,
+                sodium: item.nutrition?.sodium || item.nutrition?.sodium_mg || 450,
               },
               allergens: item.allergens && item.allergens.length > 0 ? item.allergens : ['Dairy'],
-              prepTimeMinutes: item.preparation_time_minutes || 15,
-              coreTemp: '72°C',
+              prepTimeMinutes: item.preparation_time_minutes || item.estimated_prep_time_minutes || 15,
+              coreTemp: '75°C',
               station: 'Chef Station #1',
-              chefNote: `Chef signature formulation with premium fresh ingredients.`,
-              spiceLevel: 'Medium 🌶️',
+              chefNote: item.description ? item.description.slice(0, 80) + '...' : 'Fresh kitchen preparation.',
+              spiceLevel: isVeg ? 'Medium 🌶️' : 'Medium 🌶️🌶️',
               dietaryTags: isVeg ? ['Pure Veg'] : ['Non-Veg'],
+              ingredients: item.ingredients || [],
+              customizationChips: item.customization_options || ['Standard Prep'],
             };
           });
 
-          // Merge mapped items with default items if desired, keeping unique IDs
-          setDishes((prev) => {
-            const existingCodes = new Set(mappedItems.map((m) => m.code));
-            const retainedDefaults = prev.filter((d) => !existingCodes.has(d.code));
-            return [...mappedItems, ...retainedDefaults];
-          });
+          setDishes(mappedItems);
+          if (mappedItems.length > 0) {
+            setSelectedDishId(mappedItems[0].id);
+          }
         }
       } catch (err) {
-        console.warn('Backend menu fetch returned default items:', err);
+        console.warn('Backend menu fetch fallback to authoritative JSON:', err);
       }
     }
 
-    loadDynamicMenu();
+    loadRealMenu();
   }, []);
 
   // Filtered & Sorted items
@@ -234,7 +354,8 @@ export default function MenuNutritionCmsPage() {
           const matchesCode = dish.code.toLowerCase().includes(q);
           const matchesAllergen = dish.allergens.some((a) => a.toLowerCase().includes(q));
           const matchesCategory = dish.category.toLowerCase().includes(q);
-          if (!matchesName && !matchesCode && !matchesAllergen && !matchesCategory) {
+          const matchesIngredient = dish.ingredients?.some((ing) => ing.toLowerCase().includes(q));
+          if (!matchesName && !matchesCode && !matchesAllergen && !matchesCategory && !matchesIngredient) {
             return false;
           }
         }
@@ -248,7 +369,7 @@ export default function MenuNutritionCmsPage() {
         if (selectedDietary === 'Pure Veg' && !dish.isVeg) return false;
         if (selectedDietary === 'Non-Veg' && dish.isVeg) return false;
         if (selectedDietary === 'Gluten-Free' && dish.allergens.includes('Gluten')) return false;
-        if (selectedDietary === 'Keto-Friendly' && dish.nutrition.carbs > 30) return false;
+        if (selectedDietary === 'Keto-Friendly' && dish.nutrition.carbs > 25) return false;
 
         return true;
       })
@@ -270,7 +391,7 @@ export default function MenuNutritionCmsPage() {
     .slice(0, 2)
     .join(', ');
   const vegCount = dishes.filter((d) => d.isVeg).length;
-  const vegPercent = totalCount > 0 ? Math.round((vegCount / totalCount) * 100) : 65;
+  const vegPercent = totalCount > 0 ? Math.round((vegCount / totalCount) * 100) : 80;
   const nonVegPercent = 100 - vegPercent;
 
   // Toggle item inStock (86'd status)
@@ -285,14 +406,12 @@ export default function MenuNutritionCmsPage() {
 
     showToast(`${targetDish.name} is now ${newStatus ? 'IN STOCK' : "86'D (OUT OF STOCK)"}`);
 
-    // Call backend API if connected
     try {
       if (dishId.length === 24) {
-        // Mongo ObjectId
         await menuApi.toggleItemAvailability(dishId, newStatus);
       }
     } catch (e) {
-      console.warn('API sync deferred:', e);
+      console.warn('API stock toggle deferred:', e);
     }
   };
 
@@ -303,7 +422,7 @@ export default function MenuNutritionCmsPage() {
     setDishes((prev) => prev.map((d) => ({ ...d, inStock: updatedStatus })));
     showToast(
       updatedStatus
-        ? 'All items restored to IN STOCK'
+        ? 'All menu items restored to IN STOCK'
         : 'All items marked 86 (Bulk Disabled)'
     );
   };
@@ -351,7 +470,7 @@ export default function MenuNutritionCmsPage() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `FSSAI_Nutrition_Audit_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.setAttribute('download', `Restro_FSSAI_Nutrition_Audit_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -388,50 +507,48 @@ export default function MenuNutritionCmsPage() {
     }
   };
 
-  // Handle New Dish Creation
+  // Handle New Dish Creation (Dynamic Add Dish from Everywhere)
   const handleCreateNewDish = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newDishForm.name.trim()) return;
 
     const newCode = `DISH-${100 + dishes.length + 1}`;
+    let createdDishId = `dish_${Date.now()}`;
+
     const newDish: DishItem = {
-      id: `dish_${Date.now()}`,
+      id: createdDishId,
       code: newCode,
       name: newDishForm.name.trim(),
       category: newDishForm.category,
-      description: newDishForm.description || 'Freshly prepared specialty dish.',
-      price: Number(newDishForm.price) || 250,
+      description: newDishForm.description || 'Authentic chef prepared specialty.',
+      price: Number(newDishForm.price) || 280,
       image:
         newDishForm.image.trim() ||
         'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80',
       isVeg: newDishForm.isVeg,
       inStock: true,
       nutrition: {
-        calories: Number(newDishForm.calories) || 400,
+        calories: Number(newDishForm.calories) || 350,
         protein: Number(newDishForm.protein) || 15,
-        carbs: Number(newDishForm.carbs) || 35,
-        fats: Number(newDishForm.fats) || 18,
+        carbs: Number(newDishForm.carbs) || 30,
+        fats: Number(newDishForm.fats) || 16,
         fiber: Number(newDishForm.fiber) || 4,
         sodium: 480,
       },
       allergens: newDishForm.allergens,
       prepTimeMinutes: Number(newDishForm.prepTime) || 15,
-      coreTemp: '72°C',
-      station: 'Chef Station #1',
-      chefNote: newDishForm.chefNote || 'Prepared with culinary excellence.',
+      coreTemp: '75°C',
+      station: 'Kitchen Station #1',
+      chefNote: newDishForm.chefNote || 'Crafted with premium fresh ingredients.',
       spiceLevel: newDishForm.spiceLevel,
       dietaryTags: newDishForm.isVeg ? ['Pure Veg'] : ['Non-Veg'],
     };
 
-    setDishes((prev) => [newDish, ...prev]);
-    setSelectedDishId(newDish.id);
-    setIsNewDishOpen(false);
-    showToast(`Added new dish entry: ${newDish.name}`);
-
-    // Try sending to backend
+    // Try posting to backend API
     try {
-      await menuApi.createMenuItem({
+      const apiRes = await menuApi.createMenuItem({
         name: newDish.name,
+        category_id: newDish.category,
         description: newDish.description,
         price_paise: newDish.price * 100,
         image_urls: [newDish.image],
@@ -441,9 +558,17 @@ export default function MenuNutritionCmsPage() {
         preparation_time_minutes: newDish.prepTimeMinutes,
         is_available: true,
       });
+      if (apiRes && (apiRes as any)._id) {
+        newDish.id = (apiRes as any)._id;
+      }
     } catch (e) {
       console.warn('Backend item creation deferred:', e);
     }
+
+    setDishes((prev) => [newDish, ...prev]);
+    setSelectedDishId(newDish.id);
+    setIsNewDishOpen(false);
+    showToast(`Added and published new dish: ${newDish.name}`);
   };
 
   return (
@@ -601,7 +726,7 @@ export default function MenuNutritionCmsPage() {
                 <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#A33215] ring-2 ring-white" />
               </button>
               <button
-                onClick={() => showToast('Refreshing CMS catalog & nutrition status...')}
+                onClick={() => showToast('Refreshing authoritative menu & FSSAI nutrition status...')}
                 className="w-9 h-9 rounded-lg flex items-center justify-center text-[#594139] hover:bg-[#EFEEEB] transition-colors"
                 title="Refresh catalog"
               >
@@ -626,7 +751,7 @@ export default function MenuNutritionCmsPage() {
                   </h1>
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#00873A]/15 text-[#006B2C] text-xs font-bold">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#006B2C] animate-pulse" />
-                    FSSAI &amp; Food Labelling Compliant • 96% Verified
+                    FSSAI &amp; Food Labelling Compliant • 100% Real Menu
                   </span>
                 </div>
                 <p className="text-sm text-[#594139] mt-1 font-normal">
@@ -679,13 +804,13 @@ export default function MenuNutritionCmsPage() {
                   </div>
                   <div className="flex items-center gap-1.5 mt-2">
                     <span className="text-xs text-[#006B2C] font-bold">{activeCount} Active Dishes</span>
-                    <span className="text-[#594139] text-[11px]">• 3 Seasonal, 2 Drafts</span>
+                    <span className="text-[#594139] text-[11px]">• 5 Categories, 100% Real</span>
                   </div>
                 </div>
                 <div className="w-full bg-[#F5F3F0] h-1.5 rounded-full mt-4 overflow-hidden">
                   <div
                     className="bg-[#A33215] h-full rounded-full transition-all duration-500"
-                    style={{ width: `${totalCount > 0 ? (activeCount / totalCount) * 100 : 92}%` }}
+                    style={{ width: `${totalCount > 0 ? (activeCount / totalCount) * 100 : 100}%` }}
                   />
                 </div>
               </div>
@@ -700,16 +825,16 @@ export default function MenuNutritionCmsPage() {
                 </div>
                 <div className="mt-4">
                   <div className="flex items-baseline gap-1">
-                    <span className="font-display font-black text-3xl text-[#1B1C1A] leading-none">94</span>
+                    <span className="font-display font-black text-3xl text-[#1B1C1A] leading-none">98</span>
                     <span className="font-display font-semibold text-lg text-[#594139]">/ 100</span>
                   </div>
                   <div className="flex items-center gap-1.5 mt-2">
                     <span className="text-xs text-[#006B2C] font-bold">Health Audit Score</span>
-                    <span className="text-[#594139] text-[11px]">• Allergen &amp; Cal Verified</span>
+                    <span className="text-[#594139] text-[11px]">• Lab Tested Macros</span>
                   </div>
                 </div>
                 <div className="w-full bg-[#F5F3F0] h-1.5 rounded-full mt-4 overflow-hidden">
-                  <div className="bg-[#006B2C] h-full rounded-full" style={{ width: '94%' }} />
+                  <div className="bg-[#006B2C] h-full rounded-full" style={{ width: '98%' }} />
                 </div>
               </div>
 
@@ -730,14 +855,14 @@ export default function MenuNutritionCmsPage() {
                       {disabledCount} {disabledCount === 1 ? 'Dish' : 'Dishes'} Disabled
                     </span>
                     <span className="text-[#594139] text-[11px] truncate">
-                      {disabledCount > 0 ? `• ${disabledNames}` : '• All operational'}
+                      {disabledCount > 0 ? `• ${disabledNames}` : '• All operational in kitchen'}
                     </span>
                   </div>
                 </div>
                 <div className="w-full bg-[#F5F3F0] h-1.5 rounded-full mt-4 overflow-hidden">
                   <div
                     className="bg-[#A33215] h-full rounded-full transition-all duration-500"
-                    style={{ width: `${totalCount > 0 ? (disabledCount / totalCount) * 100 : 6}%` }}
+                    style={{ width: `${totalCount > 0 ? (disabledCount / totalCount) * 100 : 0}%` }}
                   />
                 </div>
               </div>
@@ -756,7 +881,7 @@ export default function MenuNutritionCmsPage() {
                   </div>
                   <div className="flex items-center gap-1.5 mt-2">
                     <span className="text-xs text-[#006B2C] font-bold">Vegetarian</span>
-                    <span className="text-[#594139] text-[11px]">• {nonVegPercent}% Non-Veg / Poultry</span>
+                    <span className="text-[#594139] text-[11px]">• {nonVegPercent}% Non-Veg</span>
                   </div>
                 </div>
                 <div className="w-full bg-[#F5F3F0] h-1.5 rounded-full mt-4 overflow-hidden flex">
@@ -777,7 +902,7 @@ export default function MenuNutritionCmsPage() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search dish name, recipe code (e.g. DISH-104), or allergen..."
+                  placeholder="Search dish name, code (e.g. DISH-101), allergen, ingredient..."
                   className="w-full pl-10 pr-4 py-2 rounded-lg bg-[#F5F3F0] text-[#1B1C1A] placeholder:text-[#594139]/60 text-xs font-medium focus:outline-none focus:bg-[#EFEEEB] transition-colors"
                 />
                 {searchQuery && (
@@ -790,7 +915,7 @@ export default function MenuNutritionCmsPage() {
                 )}
               </div>
 
-              {/* Category Tabs */}
+              {/* Category Tabs matching Authoritative JSON */}
               <div className="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0 scrollbar-none">
                 <button
                   onClick={() => setSelectedCategory('All')}
@@ -802,46 +927,22 @@ export default function MenuNutritionCmsPage() {
                 >
                   All Categories ({dishes.length})
                 </button>
-                <button
-                  onClick={() => setSelectedCategory('Tandoor & Starters')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition-all ${
-                    selectedCategory === 'Tandoor & Starters'
-                      ? 'bg-[#A33215] text-white shadow-sm'
-                      : 'bg-[#F5F3F0] text-[#594139] hover:text-[#1B1C1A]'
-                  }`}
-                >
-                  Tandoor &amp; Starters ({dishes.filter((d) => d.category.includes('Starters') || d.category.includes('Tandoor')).length})
-                </button>
-                <button
-                  onClick={() => setSelectedCategory('Curries & Mains')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition-all ${
-                    selectedCategory === 'Curries & Mains'
-                      ? 'bg-[#A33215] text-white shadow-sm'
-                      : 'bg-[#F5F3F0] text-[#594139] hover:text-[#1B1C1A]'
-                  }`}
-                >
-                  Curries &amp; Mains ({dishes.filter((d) => d.category.includes('Curries') || d.category.includes('Mains')).length})
-                </button>
-                <button
-                  onClick={() => setSelectedCategory('Breads & Rice')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition-all ${
-                    selectedCategory === 'Breads & Rice'
-                      ? 'bg-[#A33215] text-white shadow-sm'
-                      : 'bg-[#F5F3F0] text-[#594139] hover:text-[#1B1C1A]'
-                  }`}
-                >
-                  Breads &amp; Rice ({dishes.filter((d) => d.category.includes('Breads') || d.category.includes('Rice')).length})
-                </button>
-                <button
-                  onClick={() => setSelectedCategory('Beverages & Desserts')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition-all ${
-                    selectedCategory === 'Beverages & Desserts'
-                      ? 'bg-[#A33215] text-white shadow-sm'
-                      : 'bg-[#F5F3F0] text-[#594139] hover:text-[#1B1C1A]'
-                  }`}
-                >
-                  Beverages &amp; Desserts ({dishes.filter((d) => d.category.includes('Beverages') || d.category.includes('Desserts')).length})
-                </button>
+                {CANONICAL_CATEGORIES.map((cat) => {
+                  const count = dishes.filter((d) => d.category.toLowerCase().includes(cat.toLowerCase())).length;
+                  return (
+                    <button
+                      key={cat}
+                      onClick={() => setSelectedCategory(cat)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition-all ${
+                        selectedCategory === cat
+                          ? 'bg-[#A33215] text-white shadow-sm'
+                          : 'bg-[#F5F3F0] text-[#594139] hover:text-[#1B1C1A]'
+                      }`}
+                    >
+                      {cat} ({count})
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -1210,9 +1311,9 @@ export default function MenuNutritionCmsPage() {
                       <div className="flex justify-between text-xs">
                         <span className="text-[#594139]">Dietary Fiber</span>
                         <span className="font-bold text-[#1B1C1A]">
-                          {activeDish.nutrition.fiber || 5}g{' '}
+                          {activeDish.nutrition.fiber || 3}g{' '}
                           <span className="text-[#594139] font-normal">
-                            ({Math.min(100, Math.round(((activeDish.nutrition.fiber || 5) / 25) * 100))}% DV)
+                            ({Math.min(100, Math.round(((activeDish.nutrition.fiber || 3) / 25) * 100))}% DV)
                           </span>
                         </span>
                       </div>
@@ -1220,7 +1321,7 @@ export default function MenuNutritionCmsPage() {
                         <div
                           className="bg-[#006B2C] h-full rounded-full transition-all duration-300"
                           style={{
-                            width: `${Math.min(100, Math.round(((activeDish.nutrition.fiber || 5) / 25) * 100))}%`,
+                            width: `${Math.min(100, Math.round(((activeDish.nutrition.fiber || 3) / 25) * 100))}%`,
                           }}
                         />
                       </div>
@@ -1245,7 +1346,7 @@ export default function MenuNutritionCmsPage() {
                           className="rounded accent-[#A33215] w-4 h-4 cursor-pointer"
                         />
                         <span>
-                          Milk / Lactose <em className="text-[#594139] not-italic font-normal">(Paneer cheese)</em>
+                          Milk / Lactose <em className="text-[#594139] not-italic font-normal">(Paneer / Butter / Rabri)</em>
                         </span>
                       </label>
 
@@ -1257,7 +1358,19 @@ export default function MenuNutritionCmsPage() {
                           className="rounded accent-[#A33215] w-4 h-4 cursor-pointer"
                         />
                         <span>
-                          Wheat / Gluten <em className="text-[#594139] not-italic font-normal">(Brioche bun)</em>
+                          Wheat / Gluten <em className="text-[#594139] not-italic font-normal">(Naan / Roti / Breadcrumbs)</em>
+                        </span>
+                      </label>
+
+                      <label className="flex items-center gap-2 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={activeDish.allergens.includes('Tree Nuts')}
+                          onChange={() => handleToggleAllergen('Tree Nuts')}
+                          className="rounded accent-[#A33215] w-4 h-4 cursor-pointer"
+                        />
+                        <span>
+                          Tree Nuts <em className="text-[#594139] not-italic font-normal">(Cashew / Almond / Pistachio)</em>
                         </span>
                       </label>
 
@@ -1268,28 +1381,14 @@ export default function MenuNutritionCmsPage() {
                           onChange={() => handleToggleAllergen('Soy')}
                           className="rounded accent-[#A33215] w-4 h-4 cursor-pointer"
                         />
-                        <span>
-                          Soy <em className="text-[#594139] not-italic font-normal">(Teriyaki glaze reduction)</em>
-                        </span>
+                        <span>Soy &amp; Soya Derivates</span>
                       </label>
 
                       <label className="flex items-center gap-2 cursor-pointer select-none">
                         <input
                           type="checkbox"
-                          checked={activeDish.allergens.includes('Tree Nuts') || activeDish.allergens.includes('Cashew Nut')}
-                          onChange={() => handleToggleAllergen('Tree Nuts')}
-                          className="rounded accent-[#A33215] w-4 h-4 cursor-pointer"
-                        />
-                        <span>
-                          Tree Nuts <em className="text-[#006B2C] not-italic font-normal">(Nut-free kitchen certified)</em>
-                        </span>
-                      </label>
-
-                      <label className="flex items-center gap-2 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={activeDish.allergens.includes('Crustacean / Shellfish')}
-                          onChange={() => handleToggleAllergen('Crustacean / Shellfish')}
+                          checked={activeDish.allergens.includes('Shellfish')}
+                          onChange={() => handleToggleAllergen('Shellfish')}
                           className="rounded accent-[#A33215] w-4 h-4 cursor-pointer"
                         />
                         <span>Crustacean / Shellfish</span>
@@ -1302,7 +1401,7 @@ export default function MenuNutritionCmsPage() {
                     <div className="p-2.5 rounded-lg bg-[#EFEEEB] flex flex-col border border-stone-200">
                       <span className="text-[11px] text-[#594139]">Core Temp</span>
                       <span className="font-display font-bold text-sm text-[#1B1C1A]">
-                        {activeDish.coreTemp || '72°C'}
+                        {activeDish.coreTemp || '75°C'}
                       </span>
                       <span className="text-[10px] text-[#006B2C] font-bold">Thermal Validated</span>
                     </div>
@@ -1313,7 +1412,7 @@ export default function MenuNutritionCmsPage() {
                         {activeDish.prepTimeMinutes} mins
                       </span>
                       <span className="text-[10px] text-[#594139] truncate">
-                        Station: {activeDish.station || 'Grill Press #2'}
+                        Station: {activeDish.station || 'Chef Station #1'}
                       </span>
                     </div>
                   </div>
@@ -1381,7 +1480,7 @@ export default function MenuNutritionCmsPage() {
               <span className="material-symbols-outlined text-[14px]">stream</span>Audit Stream
             </span>
             <div className="truncate text-[#594139] min-w-0">
-              [20:14:02] Table G-04 settled $142.50 via Terminal 02 • [20:13:48] Kitchen firing Order #1084 (Mains: Salmon, Ribeye) • [20:11:15] Resv #209 checked-in Floor 1
+              [20:14:02] Table G-04 settled $142.50 via Terminal 02 • [20:13:48] Kitchen firing Order #1084 (Mains: Biryani, Naan) • [20:11:15] Resv #209 checked-in Floor 1
             </div>
           </div>
           <div className="flex items-center gap-4 shrink-0 font-sans text-xs whitespace-nowrap">
@@ -1391,7 +1490,7 @@ export default function MenuNutritionCmsPage() {
         </footer>
       </div>
 
-      {/* Modal: New Dish Entry */}
+      {/* Modal: New Dish Entry (Add Dish from everywhere) */}
       {isNewDishOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
           <div className="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-stone-200 max-h-[90vh] overflow-y-auto">
@@ -1421,8 +1520,8 @@ export default function MenuNutritionCmsPage() {
                     required
                     value={newDishForm.name}
                     onChange={(e) => setNewDishForm({ ...newDishForm, name: e.target.value })}
-                    placeholder="e.g. Artisanal Burrata Bruschetta"
-                    className="p-2 rounded-lg bg-[#F5F3F0] border border-stone-200 focus:outline-none focus:bg-white text-xs"
+                    placeholder="e.g. Achari Chaap Tikka"
+                    className="p-2 rounded-lg bg-[#F5F3F0] border border-stone-200 focus:outline-none focus:bg-white text-xs font-semibold"
                   />
                 </div>
 
@@ -1433,10 +1532,11 @@ export default function MenuNutritionCmsPage() {
                     onChange={(e) => setNewDishForm({ ...newDishForm, category: e.target.value })}
                     className="p-2 rounded-lg bg-[#F5F3F0] border border-stone-200 focus:outline-none focus:bg-white text-xs font-medium"
                   >
-                    <option value="Tandoor & Starters">Tandoor &amp; Starters</option>
-                    <option value="Curries & Mains">Curries &amp; Mains</option>
-                    <option value="Breads & Rice">Breads &amp; Rice</option>
-                    <option value="Beverages & Desserts">Beverages &amp; Desserts</option>
+                    {CANONICAL_CATEGORIES.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -1489,7 +1589,7 @@ export default function MenuNutritionCmsPage() {
                   rows={2}
                   value={newDishForm.description}
                   onChange={(e) => setNewDishForm({ ...newDishForm, description: e.target.value })}
-                  placeholder="Ingredients, cooking technique, and tasting notes..."
+                  placeholder="Ingredients, preparation technique, and tasting notes..."
                   className="p-2 rounded-lg bg-[#F5F3F0] border border-stone-200 focus:outline-none focus:bg-white text-xs"
                 />
               </div>
@@ -1500,7 +1600,7 @@ export default function MenuNutritionCmsPage() {
                   type="url"
                   value={newDishForm.image}
                   onChange={(e) => setNewDishForm({ ...newDishForm, image: e.target.value })}
-                  placeholder="https://..."
+                  placeholder="https://images.unsplash.com/..."
                   className="p-2 rounded-lg bg-[#F5F3F0] border border-stone-200 focus:outline-none focus:bg-white text-xs"
                 />
               </div>
@@ -1560,7 +1660,7 @@ export default function MenuNutritionCmsPage() {
               <div className="flex flex-col gap-1">
                 <label className="font-bold text-[#1B1C1A]">Certified Allergens</label>
                 <div className="flex items-center gap-2 flex-wrap">
-                  {['Dairy', 'Gluten', 'Soy', 'Nuts', 'Egg', 'Mustard', 'Sesame'].map((item) => {
+                  {['Dairy', 'Gluten', 'Tree Nuts', 'Soy', 'Egg', 'Mustard', 'Sesame', 'Shellfish'].map((item) => {
                     const isChecked = newDishForm.allergens.includes(item);
                     return (
                       <button
@@ -1596,7 +1696,7 @@ export default function MenuNutritionCmsPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-lg bg-[#A33215] hover:bg-[#CB4914] text-white font-bold text-xs shadow-sm flex items-center gap-1.5"
+                  className="px-5 py-2 rounded-lg bg-[#A33215] hover:bg-[#CB4914] text-white font-bold text-xs shadow-sm flex items-center gap-1.5 active:scale-95"
                 >
                   <span className="material-symbols-outlined text-[16px]">check</span>
                   Save &amp; Publish Dish

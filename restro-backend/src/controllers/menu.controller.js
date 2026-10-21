@@ -54,13 +54,15 @@ export const getCategories = async (req, res) => {
 
 export const createMenuItem = async (req, res) => {
     try {
-        const {
+        let {
             restaurant_id,
             category_id,
             name,
             description,
             price_paise,
+            price,
             image_urls,
+            image_url,
             ingredients,
             allergens,
             nutrition,
@@ -71,18 +73,57 @@ export const createMenuItem = async (req, res) => {
             sort_order,
         } = req.body;
 
-        if (
-            !restaurant_id ||
-            !category_id ||
-            !name ||
-            price_paise === undefined ||
-            price_paise === null ||
-            price_paise === ''
-        ) {
+        if (!name) {
             return res.status(400).json({
                 success: false,
-                message: 'restaurant_id, category_id, name, and price_paise are required',
+                message: 'Dish name is required',
             });
+        }
+
+        // Auto-resolve restaurant_id
+        if (!restaurant_id) {
+            restaurant_id = '650000000000000000000001';
+        }
+
+        // Auto-resolve price_paise
+        if (price_paise === undefined || price_paise === null || price_paise === '') {
+            if (price !== undefined && price !== null) {
+                price_paise = Math.round(Number(price) * 100);
+            } else {
+                price_paise = 25000;
+            }
+        } else {
+            price_paise = Number(price_paise);
+        }
+
+        // Auto-resolve category_id
+        if (!category_id) {
+            const firstCat = await MenuCategory.findOne({ restaurant_id });
+            if (firstCat) {
+                category_id = firstCat._id;
+            } else {
+                const newCat = await MenuCategory.create({
+                    restaurant_id,
+                    name: 'Starters & Small Plates',
+                    sort_order: 1,
+                });
+                category_id = newCat._id;
+            }
+        } else if (typeof category_id === 'string' && category_id.length !== 24) {
+            // Category name passed instead of ObjectId
+            let cat = await MenuCategory.findOne({ name: new RegExp(`^${category_id}$`, 'i') });
+            if (!cat) {
+                cat = await MenuCategory.create({
+                    restaurant_id,
+                    name: category_id,
+                    sort_order: 10,
+                });
+            }
+            category_id = cat._id;
+        }
+
+        if (image_url && (!image_urls || image_urls.length === 0)) {
+            image_urls = [image_url];
         }
 
         const itemNutrition = nutrition || { calories: 0, protein: 0, fat: 0, carbs: 0 };

@@ -13,142 +13,206 @@ import MenuSkeleton from '@/components/customer/MenuSkeleton';
 
 const DEFAULT_MENU_ITEMS: MenuItem[] = [
   {
-    _id: 'item_1',
-    name: 'Paneer Butter Masala Special',
+    _id: 'item_str_001',
+    name: 'Paneer Tikka (Tandoori Classic)',
     description:
-      'Slow-simmered artisanal cottage cheese cubes in rich satin cashew & ripe tomato makhani with aromatic dried fenugreek leaves.',
-    price_paise: 34000,
+      'Char-grilled cubes of malai paneer marinated in hung spiced curd, mustard oil, and roasted besan.',
+    price_paise: 32000,
     image_url:
       'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=600&auto=format&fit=crop&q=80',
-    category_id: 'cat_mains',
-    dietary_labels: ['VEG', 'GLUTEN_FREE'],
-    allergens: ['Dairy', 'Cashew'],
+    category_id: 'cat_starters',
+    dietary_labels: ['VEG'],
+    allergens: ['Dairy'],
     nutrition: {
-      calories: 440,
-      protein: 18,
-      carbs: 22,
-      fats: 30,
-      basis: 'Per 250g serving',
+      calories: 320,
+      protein: 18.0,
+      carbs: 12.0,
+      fats: 22.0,
+      basis: 'Per 200g serving',
     },
     prep_time_minutes: 15,
     is_available: true,
     is_chef_pick: true,
   },
   {
-    _id: 'item_2',
-    name: 'Murgh Dum Biryani (Awadhi Style)',
+    _id: 'item_str_002',
+    name: 'Dahi Ke Kebab',
     description:
-      'Awadhi style basmati rice cooked on slow flame with whole spiced tender chicken, saffron milk & caramelized shallots.',
-    price_paise: 42000,
+      'Crisp golden patties made with hung Greek-style yogurt, soft cottage cheese, and roasted cumin.',
+    price_paise: 29000,
+    image_url:
+      'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80',
+    category_id: 'cat_starters',
+    dietary_labels: ['VEG'],
+    allergens: ['Dairy', 'Gluten'],
+    nutrition: {
+      calories: 285,
+      protein: 11.0,
+      carbs: 19.0,
+      fats: 17.0,
+      basis: 'Per 180g serving',
+    },
+    prep_time_minutes: 12,
+    is_available: true,
+  },
+  {
+    _id: 'item_cur_001',
+    name: 'Paneer Butter Masala Special',
+    description:
+      'Fresh malai paneer simmered in a slow-cooked tomato, table butter, and cashew nut reduction.',
+    price_paise: 34000,
+    image_url:
+      'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=600&auto=format&fit=crop&q=80',
+    category_id: 'cat_mains',
+    dietary_labels: ['VEG'],
+    allergens: ['Dairy', 'Tree Nuts'],
+    nutrition: {
+      calories: 440,
+      protein: 18.2,
+      carbs: 21.8,
+      fats: 30.4,
+      basis: 'Per 250g serving',
+    },
+    prep_time_minutes: 18,
+    is_available: true,
+    is_chef_pick: true,
+  },
+  {
+    _id: 'item_cur_002',
+    name: 'Dal Makhani Bukhara',
+    description:
+      'Slow-simmered whole black lentils cooked overnight with tomatoes, butter, and mild spices.',
+    price_paise: 28000,
+    image_url:
+      'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=600&auto=format&fit=crop&q=80',
+    category_id: 'cat_mains',
+    dietary_labels: ['VEG'],
+    allergens: ['Dairy'],
+    nutrition: {
+      calories: 360,
+      protein: 14.5,
+      carbs: 38.0,
+      fats: 16.8,
+      basis: 'Per 250g serving',
+    },
+    prep_time_minutes: 12,
+    is_available: true,
+  },
+  {
+    _id: 'item_cur_003',
+    name: 'Murgh Dum Biryani',
+    description:
+      'Aged long-grain basmati rice cooked with tender chicken cuts, browned shallots, and saffron.',
+    price_paise: 41000,
     image_url:
       'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=600&auto=format&fit=crop&q=80',
     category_id: 'cat_mains',
     dietary_labels: ['NON_VEG'],
     allergens: ['Dairy'],
     nutrition: {
-      calories: 580,
-      protein: 34,
-      carbs: 64,
-      fats: 20,
-      basis: 'Per 350g pot',
+      calories: 560,
+      protein: 32.0,
+      carbs: 64.0,
+      fats: 18.5,
+      basis: 'Per 350g serving',
     },
     prep_time_minutes: 20,
     is_available: true,
     is_chef_pick: true,
   },
   {
-    _id: 'item_3',
-    name: 'Tandoori Malai Broccoli',
-    description:
-      'Tender broccoli florets marinated with hung curd, roasted cardamom, white pepper, and mild melted cheddar.',
-    price_paise: 32000,
-    image_url:
-      'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80',
-    category_id: 'cat_starters',
-    dietary_labels: ['VEG', 'GLUTEN_FREE'],
-    allergens: ['Dairy'],
-    nutrition: {
-      calories: 280,
-      protein: 14,
-      carbs: 16,
-      fats: 18,
-      basis: 'Per 200g serving',
-    },
-    prep_time_minutes: 12,
-    is_available: true,
-  },
-  {
-    _id: 'item_4',
-    name: 'Smoked Garlic Butter Prawns',
-    description:
-      'Jumbo coastal prawns tossed in browned garlic butter, crushed black pepper, fresh parsley, and lemon juice.',
-    price_paise: 48000,
-    image_url:
-      'https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?w=600&auto=format&fit=crop&q=80',
-    category_id: 'cat_starters',
-    dietary_labels: ['NON_VEG'],
-    allergens: ['Shellfish', 'Dairy'],
-    nutrition: {
-      calories: 290,
-      protein: 28,
-      carbs: 4,
-      fats: 16,
-      basis: 'Per 180g serving',
-    },
-    prep_time_minutes: 12,
-    is_available: true,
-    is_chef_pick: true,
-  },
-  {
-    _id: 'item_5',
+    _id: 'item_brd_001',
     name: 'Garlic Butter Naan',
     description:
-      'Clay oven baked leavened bread brushed with melted butter and fresh minced garlic with coriander.',
-    price_paise: 8000,
+      'Classic leavened flatbread topped with minced roasted garlic, fresh cilantro, and salted butter.',
+    price_paise: 7500,
     image_url:
-      'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=600&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=600&auto=format&fit=crop&q=80',
     category_id: 'cat_breads',
     dietary_labels: ['VEG'],
     allergens: ['Gluten', 'Dairy'],
     nutrition: {
-      calories: 220,
-      protein: 6,
-      carbs: 38,
-      fats: 6,
-      basis: 'Per piece',
+      calories: 210,
+      protein: 5.5,
+      carbs: 34.0,
+      fats: 6.2,
+      basis: 'Per 90g serving',
     },
     prep_time_minutes: 6,
     is_available: true,
   },
   {
-    _id: 'item_6',
-    name: 'Spiced Masala Chaas',
+    _id: 'item_brd_002',
+    name: 'Tandoori Roti (Whole Wheat)',
     description:
-      'Traditional churned artisan buttermilk tempered with roasted cumin, green chillies, ginger, and pink rock salt.',
-    price_paise: 9000,
+      'Traditional unleavened flatbread baked in a clay tandoor using stone-ground chakki wheat.',
+    price_paise: 3500,
     image_url:
-      'https://images.unsplash.com/photo-1556881286-fc6915169721?w=600&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=600&auto=format&fit=crop&q=80',
+    category_id: 'cat_breads',
+    dietary_labels: ['VEG', 'VEGAN'],
+    allergens: ['Gluten'],
+    nutrition: {
+      calories: 120,
+      protein: 3.8,
+      carbs: 25.0,
+      fats: 0.8,
+      basis: 'Per 60g serving',
+    },
+    prep_time_minutes: 5,
+    is_available: true,
+  },
+  {
+    _id: 'item_bev_001',
+    name: 'Masala Chaas',
+    description:
+      'Traditional churned yogurt spiced with roasted cumin, rock salt, fresh ginger, and mint.',
+    price_paise: 5500,
+    image_url:
+      'https://images.unsplash.com/photo-1528751014936-863e6e7a319c?w=600&auto=format&fit=crop&q=80',
     category_id: 'cat_beverages',
-    dietary_labels: ['VEG', 'GLUTEN_FREE'],
+    dietary_labels: ['VEG'],
     allergens: ['Dairy'],
     nutrition: {
-      calories: 95,
-      protein: 5,
-      carbs: 8,
-      fats: 4,
-      basis: 'Per 300ml glass',
+      calories: 62,
+      protein: 3.1,
+      carbs: 4.8,
+      fats: 3.2,
+      basis: 'Per 250ml glass',
     },
     prep_time_minutes: 4,
+    is_available: true,
+  },
+  {
+    _id: 'item_des_001',
+    name: 'Gulab Jamun with Rabri',
+    description:
+      'Soft fried milk dough dumplings soaked in cardamom syrup, served over slow-cooked reduced milk.',
+    price_paise: 14000,
+    image_url:
+      'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=600&auto=format&fit=crop&q=80',
+    category_id: 'cat_desserts',
+    dietary_labels: ['VEG'],
+    allergens: ['Dairy', 'Tree Nuts'],
+    nutrition: {
+      calories: 380,
+      protein: 7.2,
+      carbs: 52.0,
+      fats: 16.0,
+      basis: 'Per 150g serving',
+    },
+    prep_time_minutes: 5,
     is_available: true,
   },
 ];
 
 const CATEGORIES: MenuCategory[] = [
-  { _id: 'ALL', name: 'All Dishes', slug: 'all', item_count: 6 },
-  { _id: 'cat_starters', name: 'Starters', slug: 'starters', item_count: 2 },
-  { _id: 'cat_mains', name: 'Curries & Biryani', slug: 'mains', item_count: 2 },
-  { _id: 'cat_breads', name: 'Tandoori Breads', slug: 'breads', item_count: 1 },
-  { _id: 'cat_beverages', name: 'Beverages', slug: 'beverages', item_count: 1 },
+  { _id: 'ALL', name: 'All Dishes', slug: 'all', item_count: 9 },
+  { _id: 'cat_starters', name: 'Starters & Small Plates', slug: 'starters', item_count: 2 },
+  { _id: 'cat_mains', name: 'Mains (Curries & Specialties)', slug: 'mains', item_count: 3 },
+  { _id: 'cat_breads', name: 'Tandoor & Breads', slug: 'breads', item_count: 2 },
+  { _id: 'cat_beverages', name: 'Beverages & Coolers', slug: 'beverages', item_count: 1 },
+  { _id: 'cat_desserts', name: 'Desserts', slug: 'desserts', item_count: 1 },
 ];
 
 export default function CustomerMenuPage() {
@@ -175,9 +239,12 @@ export default function CustomerMenuPage() {
     let isMounted = true;
     const loadApiMenu = async () => {
       try {
-        const fetched = await menuApi.getMenuItems();
-        if (isMounted && fetched && fetched.length > 0) {
-          setItems(fetched);
+        const [fetchedItems, fetchedCats] = await Promise.allSettled([
+          menuApi.getMenuItems(),
+          menuApi.getCategories(),
+        ]);
+        if (isMounted && fetchedItems.status === 'fulfilled' && fetchedItems.value?.length > 0) {
+          setItems(fetchedItems.value);
         }
       } catch {
         // Fallback to defaults
@@ -196,8 +263,22 @@ export default function CustomerMenuPage() {
   // Filtered dishes
   const filteredDishes = useMemo(() => {
     return items.filter((dish) => {
-      if (activeCategory !== 'ALL' && dish.category_id !== activeCategory) {
-        return false;
+      if (activeCategory !== 'ALL') {
+        const catObj = typeof dish.category_id === 'object' ? dish.category_id as any : null;
+        const catId = catObj?._id || dish.category_id;
+        const catName = (catObj?.name || '').toLowerCase();
+        
+        const isMatch =
+          catId === activeCategory ||
+          (activeCategory === 'cat_starters' && catName.includes('starter')) ||
+          (activeCategory === 'cat_mains' && (catName.includes('main') || catName.includes('curri'))) ||
+          (activeCategory === 'cat_breads' && (catName.includes('bread') || catName.includes('tandoor'))) ||
+          (activeCategory === 'cat_beverages' && (catName.includes('beverage') || catName.includes('cooler'))) ||
+          (activeCategory === 'cat_desserts' && catName.includes('dessert'));
+
+        if (!isMatch) {
+          return false;
+        }
       }
       if (selectedDiet === 'VEG' && !dish.dietary_labels.includes('VEG') && !dish.dietary_labels.includes('VEGAN')) {
         return false;

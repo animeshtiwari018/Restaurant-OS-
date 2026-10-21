@@ -21,30 +21,37 @@ export default function AdminDashboardPage() {
   const [stockItems, setStockItems] = useState<StockItem[]>([
     {
       id: 'item_1',
+      name: 'Paneer Tikka (Tandoori Classic)',
+      price: '₹320.00',
+      calories: '320 kcal',
+      inStock: true,
+    },
+    {
+      id: 'item_2',
       name: 'Paneer Butter Masala Special',
       price: '₹340.00',
       calories: '440 kcal',
       inStock: true,
     },
     {
-      id: 'item_2',
+      id: 'item_3',
       name: 'Dal Makhani Bukhara',
       price: '₹280.00',
       calories: '360 kcal',
       inStock: true,
     },
     {
-      id: 'item_3',
-      name: 'Tandoori Roti',
-      price: '₹45.00',
-      calories: '120 kcal',
-      inStock: false,
+      id: 'item_4',
+      name: 'Murgh Dum Biryani',
+      price: '₹410.00',
+      calories: '560 kcal',
+      inStock: true,
     },
     {
-      id: 'item_4',
-      name: 'Hawaiian Teriyaki Slider',
-      price: '₹340.00',
-      calories: '510 kcal',
+      id: 'item_5',
+      name: 'Tandoori Roti (Whole Wheat)',
+      price: '₹35.00',
+      calories: '120 kcal',
       inStock: true,
     },
   ]);
@@ -237,7 +244,7 @@ export default function AdminDashboardPage() {
               <span>+ Quick Walk-in Table</span>
             </button>
             <Link
-              href="/menu"
+              href="/admin/menu?add=true"
               className="inline-flex items-center whitespace-nowrap gap-1.5 px-3.5 py-2 rounded-xl bg-[#F5F3F0] text-[#1B1C1A] text-xs font-bold hover:bg-[#EAE8E5] transition-colors border border-[#EAE8E5] active:scale-95"
             >
               <span className="material-symbols-outlined text-[17px]">add</span>
