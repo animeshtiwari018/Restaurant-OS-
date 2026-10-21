@@ -46,6 +46,11 @@ export default function StaffLayout({
     return <main className="min-h-screen bg-[#121312] text-white font-sans">{children}</main>;
   }
 
+  // Admin dashboard uses its dedicated Stitch executive shell
+  if (pathname.startsWith('/admin')) {
+    return <>{children}</>;
+  }
+
   const role = (user?.role || 'WAITER').toUpperCase();
 
   return (
