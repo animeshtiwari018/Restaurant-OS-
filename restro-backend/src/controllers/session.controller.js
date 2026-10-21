@@ -9,6 +9,7 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiError } from '../utils/apiError.js';
 import { ApiResponse } from '../utils/apiResponse.js';
 import { JWT_SECRET } from '../utils/token.js';
+import { getIO } from '../sockets/index.js';
 
 /**
  * Reconnection State Hydration API
@@ -150,4 +151,32 @@ export const getCurrentSessionState = asyncHandler(async (req, res) => {
     );
 });
 
-export default { getCurrentSessionState };
+/**
+ * Request Table Service / Assistance (Water, Cutlery, Cleaning, Help)
+ * Route: POST /api/v1/sessions/:sessionId/call-waiter
+ */
+export const callWaiterForSession = asyncHandler(async (req, res) => {
+    const { sessionId } = req.params;
+    const { type } = req.body;
+
+    const session = await TableSession.findById(sessionId);
+    if (!session) {
+        throw new ApiError(404, 'Table session not found.');
+    }
+
+    const io = getIO();
+    if (io) {
+        io.to('room:waiters').emit('WAITER_CALL_ALERT', {
+            sessionId: session._id,
+            tableNumber: session.table_number,
+            type: type || 'ASSISTANCE',
+            time: new Date()
+        });
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, { tableNumber: session.table_number, type: type || 'ASSISTANCE' }, 'Waiter notified successfully.')
+    );
+});
+
+export default { getCurrentSessionState, callWaiterForSession };
