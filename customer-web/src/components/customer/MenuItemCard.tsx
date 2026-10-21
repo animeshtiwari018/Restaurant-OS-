@@ -78,10 +78,10 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({ item, onSelect }) =>
           </p>
 
           <div className="mt-2.5 flex items-baseline gap-2">
-            <span className="font-display font-bold text-base text-primary">
+            <span className="font-display font-extrabold text-[17px] text-primary tracking-tight">
               {formatRupees(item.price_paise)}
             </span>
-            <span className="text-[10px] text-[#594139] uppercase tracking-wider font-semibold">
+            <span className="text-[10.5px] text-[#594139] uppercase tracking-wider font-semibold">
               • {item.nutrition?.basis || '1 serving'}
             </span>
           </div>
