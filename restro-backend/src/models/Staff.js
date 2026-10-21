@@ -46,6 +46,26 @@ const staffSchema = new mongoose.Schema(
             trim: true,
             default: null
         },
+        pin: {
+            type: String,
+            trim: true,
+            default: '1234'
+        },
+        designation: {
+            type: String,
+            trim: true,
+            default: 'Captain'
+        },
+        avatar_url: {
+            type: String,
+            trim: true,
+            default: null
+        },
+        tables_assigned: {
+            type: String,
+            trim: true,
+            default: 'T-01 - T-12'
+        },
         is_active: {
             type: Boolean,
             default: true
