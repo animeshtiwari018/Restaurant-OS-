@@ -9,6 +9,7 @@ import MenuItemCard from '@/components/customer/MenuItemCard';
 import ProductDetailDrawer from '@/components/customer/ProductDetailDrawer';
 import CartDrawer from '@/components/customer/CartDrawer';
 import LiveOrderStepper from '@/components/customer/LiveOrderStepper';
+import MenuSkeleton from '@/components/customer/MenuSkeleton';
 
 const DEFAULT_MENU_ITEMS: MenuItem[] = [
   {
@@ -153,6 +154,7 @@ const CATEGORIES: MenuCategory[] = [
 export default function CustomerMenuPage() {
   const searchParams = useSearchParams();
   const [items, setItems] = useState<MenuItem[]>(DEFAULT_MENU_ITEMS);
+  const [isLoading, setIsLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<string>('ALL');
   const [selectedDiet, setSelectedDiet] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
@@ -170,17 +172,25 @@ export default function CustomerMenuPage() {
 
   // Fetch real menu from API if available
   useEffect(() => {
+    let isMounted = true;
     const loadApiMenu = async () => {
       try {
         const fetched = await menuApi.getMenuItems();
-        if (fetched && fetched.length > 0) {
+        if (isMounted && fetched && fetched.length > 0) {
           setItems(fetched);
         }
       } catch {
         // Fallback to defaults
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
     loadApiMenu();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // Filtered dishes
@@ -223,8 +233,12 @@ export default function CustomerMenuPage() {
     }
   };
 
+  if (isLoading) {
+    return <MenuSkeleton />;
+  }
+
   return (
-    <div className="px-4 flex flex-col gap-3 mt-3">
+    <div className="px-4 flex flex-col gap-3 mt-3 animate-in fade-in duration-200">
       {/* Search Input Bar */}
       <div className="relative flex items-center">
         <span className="material-symbols-outlined absolute left-3.5 text-[#594139] text-[20px] pointer-events-none">
