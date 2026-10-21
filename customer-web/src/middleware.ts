@@ -35,7 +35,12 @@ function parseJwtPayload(token: string): StaffTokenPayload | null {
 export function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
-  // Allow staff login page through without token checks
+  // Waiter handheld PIN login acts as an on-duty PIN terminal/switch screen: allow direct access
+  if (pathname.startsWith('/waiter/login')) {
+    return NextResponse.next();
+  }
+
+  // Allow general staff login page through without token checks
   if (pathname === '/staff/login') {
     // If staff user is already authenticated with a valid token, auto-forward to assigned dashboard
     const existingToken =
