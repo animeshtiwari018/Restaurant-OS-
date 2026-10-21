@@ -149,3 +149,30 @@ export const getMenuItems = async (req, res) => {
         });
     }
 };
+
+export const updateMenuItem = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updateData = req.body;
+
+        const updated = await MenuItem.findByIdAndUpdate(id, updateData, { new: true });
+        if (!updated) {
+            return res.status(404).json({
+                success: false,
+                message: 'Menu item not found',
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Menu item updated successfully',
+            data: updated,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
