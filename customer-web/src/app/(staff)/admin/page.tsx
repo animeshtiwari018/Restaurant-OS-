@@ -95,7 +95,7 @@ export default function AdminDashboardPage() {
             </button>
 
             <Link
-              href="/menu"
+              href="/admin/menu"
               className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-stone-300 hover:bg-white/10 hover:text-white transition-colors text-xs font-semibold"
             >
               <span className="material-symbols-outlined shrink-0 text-[20px]">menu_book</span>
