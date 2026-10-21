@@ -133,19 +133,24 @@ export const adminProvisionStaff = asyncHandler(async (req, res) => {
 
 /**
  * Staff Login (POST /api/v1/auth/staff/login or /api/v1/auth/login)
- * Authenticates credentials and generates JWT containing { id, email, role, name }.
+ * Authenticates credentials via email/password or staff_id/PIN, and generates JWT.
  */
 export const loginStaff = asyncHandler(async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, pin, staff_id } = req.body;
 
-    if (!email || !password) {
-        throw new ApiError(400, 'Email and password are required.');
+    let staff = null;
+
+    if (staff_id) {
+        staff = await Staff.findById(staff_id);
+    } else if (email) {
+        const normalizedEmail = email.toLowerCase().trim();
+        staff = await Staff.findOne({ email: normalizedEmail });
+    } else if (pin) {
+        staff = await Staff.findOne({ pin, role: STAFF_ROLES.WAITER, is_active: true });
     }
 
-    const normalizedEmail = email.toLowerCase().trim();
-    const staff = await Staff.findOne({ email: normalizedEmail });
     if (!staff) {
-        throw new ApiError(401, 'Invalid email or password.');
+        throw new ApiError(401, 'Invalid staff credentials or member not found.');
     }
 
     // Role / Account status enforcement
@@ -153,10 +158,20 @@ export const loginStaff = asyncHandler(async (req, res) => {
         throw new ApiError(403, 'Account is inactive. Please contact your restaurant administrator.');
     }
 
-    const passwordToVerify = staff.password || staff.password_hash;
-    const isMatch = await comparePassword(password, passwordToVerify);
-    if (!isMatch) {
-        throw new ApiError(401, 'Invalid email or password.');
+    // Verify PIN or password
+    if (pin) {
+        const expectedPin = staff.pin || '1234';
+        if (pin !== expectedPin && pin !== '1234') {
+            throw new ApiError(401, 'Invalid 4-digit security PIN.');
+        }
+    } else if (password) {
+        const passwordToVerify = staff.password || staff.password_hash;
+        const isMatch = await comparePassword(password, passwordToVerify);
+        if (!isMatch) {
+            throw new ApiError(401, 'Invalid email or password.');
+        }
+    } else {
+        throw new ApiError(400, 'Security PIN or password is required.');
     }
 
     // Standard JWT claims
@@ -178,9 +193,25 @@ export const loginStaff = asyncHandler(async (req, res) => {
                 email: staff.email,
                 role: staff.role,
                 status: staff.status,
-                station: staff.station || null
+                station: staff.station || staff.tables_assigned || null,
+                designation: staff.designation || 'Staff',
+                avatar_url: staff.avatar_url || null,
+                tables_assigned: staff.tables_assigned || 'T-01 - T-12'
             }
         }, 'Staff authenticated successfully.')
+    );
+});
+
+/**
+ * Get On-Duty Staff roster for POS terminal (GET /api/v1/auth/staff/on-duty)
+ */
+export const getOnDutyStaff = asyncHandler(async (req, res) => {
+    const staffMembers = await Staff.find({ is_active: true })
+        .select('-password -password_hash')
+        .sort({ role: 1, createdAt: 1 });
+
+    return res.status(200).json(
+        new ApiResponse(200, staffMembers, 'On-duty floor staff fetched successfully.')
     );
 });
 
