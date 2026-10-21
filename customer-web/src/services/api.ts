@@ -66,8 +66,16 @@ export const menuApi = {
 // Dining Session API Services
 export const sessionApi = {
   async resolveToken(token: string) {
-    const res = await apiClient.get(`/tables/qr/${token}`);
-    return res.data?.data || res.data;
+    const res = await apiClient.get('/tables/verify-session', { params: { token } });
+    const data = res.data?.data || res.data;
+    return {
+      tableNumber: data.table?.table_number || data.session?.table_number || data.tableNumber,
+      floor: data.table?.floor || data.floor || 'Ground Floor Dining',
+      sessionId: data.session?._id || data.sessionId,
+      sessionToken: data.sessionToken,
+      waiterName: data.session?.waiter_name || data.waiterName || 'Rahul S.',
+      ...data,
+    };
   },
 
   async getSession(sessionId: string) {
@@ -144,12 +152,12 @@ export const kitchenApi = {
 // Billing & Settlement Services
 export const billingApi = {
   async getBillSummary(sessionId: string): Promise<BillSummary> {
-    const res = await apiClient.get(`/billing/session/${sessionId}`);
+    const res = await apiClient.get(`/billing/sessions/${sessionId}`);
     return res.data?.data || res.data;
   },
 
   async settleBill(sessionId: string, paymentMethod: 'UPI' | 'CARD' | 'CASH', amountPaise: number) {
-    const res = await apiClient.post(`/billing/session/${sessionId}/settle`, {
+    const res = await apiClient.post(`/billing/sessions/${sessionId}/settle`, {
       paymentMethod,
       amountPaise,
     });
