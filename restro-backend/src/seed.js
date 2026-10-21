@@ -6,6 +6,7 @@ import connectDB from './db/index.js';
 import { MenuCategory } from './models/MenuCategory.js';
 import { MenuItem } from './models/MenuItem.js';
 import { Table } from './models/Table.js';
+import { Staff } from './models/Staff.js';
 
 async function seedData() {
     try {
@@ -256,6 +257,60 @@ async function seedData() {
 
         await MenuItem.insertMany(dishes);
         console.log(`✅ Seeded ${dishes.length} menu items from authoritative JSON.`);
+
+        // 4. Create Staff Members
+        await Staff.deleteMany({});
+        const staff = await Staff.insertMany([
+            {
+                name: 'Rahul S.',
+                email: 'rahul@restro.com',
+                password: 'password123',
+                pin: '1234',
+                role: 'WAITER',
+                designation: 'Senior Captain',
+                tables_assigned: 'T-01 - T-12',
+                avatar_url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAosjdrDwGauBsKQckQTcGgCYndTOoJDzY2x57CXAYiS07EFVk7DMzC8_T_0f1hyaPpp7cjEOWK-Q-nNYWgE3ROQn5C3jpT1T5KIDLNtq4xMVpJHlCKUeVizCqPXxMdSPjtOUwU9SRxTqQlTKF41v14tk-2A-XdBqXRwfofaTasRK-GZVh-ehOGrfZ3H179ojJRL-OOgX3DG-5ZCuMIfA_LnwW7gWspeL5ZcfWdjUBsXCVA1EHtCmvZeQ',
+                status: 'ACTIVE',
+                is_active: true
+            },
+            {
+                name: 'Priya M.',
+                email: 'priya@restro.com',
+                password: 'password123',
+                pin: '1234',
+                role: 'WAITER',
+                designation: 'Terrace Captain',
+                tables_assigned: 'Terrace Lounge',
+                avatar_url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCoStGQCKEBdWcDJh1_jROEkfCXLkhhwIGcW6zpHYqy3t7wdZiPL3azyIghZtKmCg371drEqooB9dnEns1g8T8objihBTAiwEgsHHVNamImfN0zw9YWqcJE3o0MGHZGX__T1GQTXmA-eZLWTlrTqc_Hl0qrCgPNN2bfCPz_K-zTHvR_RS6FyhEvhhwj5yQmh8sypkGHfgz_5XH_IfVn6mU4zAGdwFGqeEIP7t6H1PgqL2mUMVnocLzqmw',
+                status: 'ACTIVE',
+                is_active: true
+            },
+            {
+                name: 'Amit K.',
+                email: 'amit@restro.com',
+                password: 'password123',
+                pin: '1234',
+                role: 'WAITER',
+                designation: 'Lead Runner',
+                tables_assigned: 'Section B',
+                avatar_url: null,
+                status: 'ACTIVE',
+                is_active: true
+            },
+            {
+                name: 'Vikas R.',
+                email: 'vikas@restro.com',
+                password: 'password123',
+                pin: '1234',
+                role: 'WAITER',
+                designation: 'Bar Captain',
+                tables_assigned: 'High-Tops',
+                avatar_url: null,
+                status: 'ACTIVE',
+                is_active: true
+            }
+        ]);
+        console.log(`✅ Seeded ${staff.length} on-duty staff members.`);
 
         console.log('🎉 Seeding completed successfully!');
         process.exit(0);
