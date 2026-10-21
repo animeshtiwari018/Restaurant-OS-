@@ -53,7 +53,9 @@ export type OrderStatus =
   | 'PREPARING'
   | 'READY'
   | 'SERVED'
-  | 'REJECTED';
+  | 'COMPLETED'
+  | 'REJECTED'
+  | 'CANCELLED';
 
 export type KitchenItemStatus = 'QUEUED' | 'PREPARING' | 'READY';
 
