@@ -183,7 +183,7 @@ export default function WaiterLoginPage() {
     [redirectTarget, router]
   );
 
-  // Authenticate PIN
+  // Authenticate PIN directly by matching whoever owns this PIN
   const submitPin = useCallback(
     async (pinToVerify: string) => {
       if (pinToVerify.length !== 4) return;
@@ -191,11 +191,9 @@ export default function WaiterLoginPage() {
       setErrorMessage(null);
 
       try {
-        const staffIdToUse = activeStaff._id || activeStaff.id;
-
-        // Try backend PIN authentication
+        // 1. Try backend PIN authentication directly with { pin: pinToVerify }
         try {
-          const response = await authApi.waiterPinLogin(staffIdToUse, pinToVerify);
+          const response = await authApi.staffLogin({ pin: pinToVerify });
           if (response?.token && response?.staff) {
             handleLoginSuccess(response.token, response.staff);
             return;
@@ -204,20 +202,24 @@ export default function WaiterLoginPage() {
           console.warn('Backend PIN auth error, checking local match:', backendErr.message);
         }
 
-        // Local check fallback
-        const expectedPin = activeStaff.pin || '1234';
-        if (pinToVerify === expectedPin || pinToVerify === '1234') {
+        // 2. Local check fallback: find whichever staff member owns this PIN
+        const matchedStaff =
+          staffList.find((s) => s.pin === pinToVerify) ||
+          DEFAULT_ON_DUTY_STAFF.find((s) => s.pin === pinToVerify) ||
+          (pinToVerify === '1234' ? (staffList[0] || DEFAULT_ON_DUTY_STAFF[0]) : null);
+
+        if (matchedStaff) {
           // Generate valid client JWT token
           const mockJwt = btoa(
             JSON.stringify({
-              id: activeStaff._id || activeStaff.id,
-              name: activeStaff.name,
-              email: activeStaff.email,
-              role: 'WAITER',
+              id: matchedStaff._id || matchedStaff.id,
+              name: matchedStaff.name,
+              email: matchedStaff.email,
+              role: matchedStaff.role || 'WAITER',
               exp: Math.floor(Date.now() / 1000) + 86400,
             })
           );
-          handleLoginSuccess(`mock_jwt_${mockJwt}`, activeStaff);
+          handleLoginSuccess(`mock_jwt_${mockJwt}`, matchedStaff);
         } else {
           setErrorMessage('Invalid 4-digit security PIN. Please try again.');
           setPinDigits('');
@@ -229,7 +231,7 @@ export default function WaiterLoginPage() {
         setIsLoading(false);
       }
     },
-    [activeStaff, handleLoginSuccess]
+    [staffList, handleLoginSuccess]
   );
 
 
@@ -359,7 +361,8 @@ export default function WaiterLoginPage() {
             </div>
           </header>
 
-          {/* Active Staff Profile Quick-Switcher */}
+          {/* On-Duty Floor Staff Selection (Commented out: direct PIN-based login) */}
+          {/*
           <section className="mt-3 px-4">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center space-x-1.5">
@@ -441,7 +444,6 @@ export default function WaiterLoginPage() {
                 );
               })}
 
-              {/* Quick Option: Other Staff */}
               <button
                 onClick={() => setCustomStaffModalOpen(true)}
                 className="flex-shrink-0 flex items-center justify-center px-3 rounded-xl bg-[#EAE8E5] hover:bg-[#E4E2DF] text-[#594139] text-xs font-semibold space-x-1 active:scale-95 border border-stone-200"
@@ -452,6 +454,7 @@ export default function WaiterLoginPage() {
               </button>
             </div>
           </section>
+          */}
 
           {/* Shift & Station Reassurance Banner */}
           <section className="mt-2.5 px-4">
@@ -555,7 +558,7 @@ export default function WaiterLoginPage() {
                 Enter Security PIN
               </h2>
               <p className="text-xs text-[#594139] mt-0.5 mb-5 text-center">
-                Terminal access for <span className="text-[#A73400] font-bold">{activeStaff.name}</span> • Default: <span className="font-mono font-bold text-[#A73400]">1234</span>
+                Enter your 4-digit waiter PIN to unlock • Default: <span className="font-mono font-bold text-[#A73400]">1234</span>
               </p>
 
               {/* 4 Clean Reference-style Separate Boxes */}
