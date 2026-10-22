@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { authApi, staffAuth } from '@/services/api';
 
@@ -76,6 +76,9 @@ export default function WaiterLoginPage() {
   const [staffList, setStaffList] = useState<OnDutyStaff[]>(DEFAULT_ON_DUTY_STAFF);
   const [selectedStaffId, setSelectedStaffId] = useState<string>('staff_rahul');
   const [pinDigits, setPinDigits] = useState<string>('');
+  const [isInputFocused, setIsInputFocused] = useState(false);
+  const [showPin, setShowPin] = useState(false);
+  const pinInputRef = useRef<HTMLInputElement>(null);
   const [currentOutlet, setCurrentOutlet] = useState<string>(OUTLETS[0]);
   const [isOutletSwitchOpen, setIsOutletSwitchOpen] = useState(false);
   const [latency, setLatency] = useState<number>(14);
@@ -229,25 +232,6 @@ export default function WaiterLoginPage() {
     [activeStaff, handleLoginSuccess]
   );
 
-  // Add digit from keypad
-  const handleNumClick = (digit: string) => {
-    if (pinDigits.length < 4) {
-      const nextDigits = pinDigits + digit;
-      setPinDigits(nextDigits);
-      setErrorMessage(null);
-      if (nextDigits.length === 4) {
-        submitPin(nextDigits);
-      }
-    }
-  };
-
-  // Backspace
-  const handleBackspace = () => {
-    if (pinDigits.length > 0) {
-      setPinDigits((prev) => prev.slice(0, -1));
-      setErrorMessage(null);
-    }
-  };
 
   // Clear All
   const handleClear = () => {
@@ -535,14 +519,26 @@ export default function WaiterLoginPage() {
           <section className="mt-3 px-4 flex flex-col items-center">
             <div className="w-full flex items-center justify-between mb-1.5">
               <span className="text-xs font-semibold text-[#594139]">Floor Security PIN</span>
-              <button
-                onClick={handleClear}
-                className="text-xs text-[#A73400] font-bold hover:underline transition-all py-1 px-2 rounded active:bg-[#FFDBCF]/20"
-                id="pin-clear"
-                type="button"
-              >
-                Clear All
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowPin(!showPin)}
+                  className="text-xs text-[#594139] hover:text-[#1B1C1A] font-semibold flex items-center gap-1 transition-all py-1 px-1.5 rounded"
+                  type="button"
+                >
+                  <span className="material-symbols-outlined text-[15px]">
+                    {showPin ? 'visibility_off' : 'visibility'}
+                  </span>
+                  <span>{showPin ? 'Hide' : 'Show'}</span>
+                </button>
+                <button
+                  onClick={handleClear}
+                  className="text-xs text-[#A73400] font-bold hover:underline transition-all py-1 px-2 rounded active:bg-[#FFDBCF]/20"
+                  id="pin-clear"
+                  type="button"
+                >
+                  Clear All
+                </button>
+              </div>
             </div>
 
             {/* Error Message */}
@@ -553,204 +549,80 @@ export default function WaiterLoginPage() {
               </div>
             )}
 
-            {/* PIN Visual Indicators (4 Digits) */}
-            <div className="w-full bg-white rounded-2xl p-4 shadow-sm flex flex-col items-center border border-stone-200">
-              <p className="font-display font-semibold text-sm text-[#1B1C1A] text-center mb-3">
+            {/* Separate Modern PIN Boxes */}
+            <div className="w-full bg-white rounded-2xl p-5 shadow-sm flex flex-col items-center border border-stone-200">
+              <p className="font-display font-semibold text-sm text-[#1B1C1A] text-center mb-1">
                 Enter 4-Digit PIN for{' '}
                 <span className="text-[#A73400] font-bold">{activeStaff.name}</span>
               </p>
+              <p className="text-xs text-[#594139] mb-4 text-center">
+                Default PIN: <span className="font-mono font-bold text-[#A73400]">1234</span>
+              </p>
 
-              {/* Dots display */}
+              {/* 4 Separate Styled PIN Boxes (Box 1, Box 2, Box 3, Box 4) */}
               <div
-                aria-label="PIN digits entered"
-                className="flex items-center justify-center space-x-4 my-1"
-                id="pin-dots"
+                onClick={() => pinInputRef.current?.focus()}
+                className="relative flex items-center justify-center gap-3 my-2 cursor-pointer select-none"
               >
-                {[0, 1, 2, 3].map((idx) => {
-                  const isFilled = idx < pinDigits.length;
-                  const isActiveEmpty = idx === pinDigits.length;
+                {/* Invisible input capturing native mobile & desktop input */}
+                <input
+                  ref={pinInputRef}
+                  id="pin-input"
+                  type={showPin ? 'text' : 'password'}
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={4}
+                  autoFocus
+                  value={pinDigits}
+                  onFocus={() => setIsInputFocused(true)}
+                  onBlur={() => setIsInputFocused(false)}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '').slice(0, 4);
+                    setPinDigits(val);
+                    setErrorMessage(null);
+                    if (val.length === 4) {
+                      submitPin(val);
+                    }
+                  }}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  autoComplete="one-time-code"
+                />
 
-                  if (isFilled) {
-                    return (
-                      <div
-                        key={idx}
-                        className="w-4 h-4 rounded-full bg-[#A73400] shadow-sm ring-2 ring-[#A73400]/20 transition-all transform scale-110"
-                      />
-                    );
-                  }
-                  if (isActiveEmpty) {
-                    return (
-                      <div
-                        key={idx}
-                        className="w-4 h-4 rounded-full bg-[#EAE8E5] transition-all animate-pulse ring-2 ring-[#A73400]/40"
-                      />
-                    );
-                  }
+                {[0, 1, 2, 3].map((idx) => {
+                  const digit = pinDigits[idx];
+                  const isFilled = Boolean(digit);
+                  const isActive =
+                    isInputFocused &&
+                    (pinDigits.length === idx || (idx === 3 && pinDigits.length === 4));
+
                   return (
                     <div
                       key={idx}
-                      className="w-4 h-4 rounded-full bg-[#EAE8E5] transition-all"
-                    />
+                      className={`w-14 h-16 sm:w-16 sm:h-18 rounded-2xl flex items-center justify-center font-mono text-2xl font-extrabold transition-all duration-150 border-2 ${
+                        isActive
+                          ? 'border-[#A73400] bg-white ring-4 ring-[#A73400]/15 scale-105 shadow-md text-[#A73400]'
+                          : isFilled
+                          ? 'border-[#A73400]/60 bg-white text-[#1B1C1A] shadow-xs'
+                          : 'border-stone-200 bg-[#FAF8F5] text-stone-300'
+                      }`}
+                    >
+                      {isFilled ? (
+                        showPin ? (
+                          <span>{digit}</span>
+                        ) : (
+                          <span className="w-3.5 h-3.5 rounded-full bg-[#1B1C1A] inline-block" />
+                        )
+                      ) : isActive ? (
+                        <span className="w-0.5 h-6 bg-[#A73400] animate-pulse rounded-full" />
+                      ) : (
+                        <span className="text-xs text-stone-300 font-mono font-medium">
+                          {idx + 1}
+                        </span>
+                      )}
+                    </div>
                   );
                 })}
               </div>
-            </div>
-          </section>
-
-          {/* Large Tactile Numeric Keypad */}
-          <section className="mt-3 px-4 w-full">
-            <div className="grid grid-cols-3 gap-2.5 max-w-[380px] mx-auto select-none">
-              {/* 1 */}
-              <button
-                onClick={() => handleNumClick('1')}
-                className="num-key h-[58px] rounded-xl bg-white shadow-sm flex flex-col items-center justify-center active:bg-[#EFEEEB] active:scale-95 transition-all text-[#1B1C1A] border border-stone-200"
-                type="button"
-              >
-                <span className="font-display text-xl font-bold leading-none">1</span>
-                <span className="text-[10px] text-[#594139] font-semibold tracking-wider mt-0.5 leading-none opacity-40">
-                  &nbsp;
-                </span>
-              </button>
-
-              {/* 2 */}
-              <button
-                onClick={() => handleNumClick('2')}
-                className="num-key h-[58px] rounded-xl bg-white shadow-sm flex flex-col items-center justify-center active:bg-[#EFEEEB] active:scale-95 transition-all text-[#1B1C1A] border border-stone-200"
-                type="button"
-              >
-                <span className="font-display text-xl font-bold leading-none">2</span>
-                <span className="text-[10px] text-[#594139] font-bold tracking-widest mt-0.5 leading-none">
-                  ABC
-                </span>
-              </button>
-
-              {/* 3 */}
-              <button
-                onClick={() => handleNumClick('3')}
-                className="num-key h-[58px] rounded-xl bg-white shadow-sm flex flex-col items-center justify-center active:bg-[#EFEEEB] active:scale-95 transition-all text-[#1B1C1A] border border-stone-200"
-                type="button"
-              >
-                <span className="font-display text-xl font-bold leading-none">3</span>
-                <span className="text-[10px] text-[#594139] font-bold tracking-widest mt-0.5 leading-none">
-                  DEF
-                </span>
-              </button>
-
-              {/* 4 */}
-              <button
-                onClick={() => handleNumClick('4')}
-                className="num-key h-[58px] rounded-xl bg-white shadow-sm flex flex-col items-center justify-center active:bg-[#EFEEEB] active:scale-95 transition-all text-[#1B1C1A] border border-stone-200"
-                type="button"
-              >
-                <span className="font-display text-xl font-bold leading-none">4</span>
-                <span className="text-[10px] text-[#594139] font-bold tracking-widest mt-0.5 leading-none">
-                  GHI
-                </span>
-              </button>
-
-              {/* 5 */}
-              <button
-                onClick={() => handleNumClick('5')}
-                className="num-key h-[58px] rounded-xl bg-white shadow-sm flex flex-col items-center justify-center active:bg-[#EFEEEB] active:scale-95 transition-all text-[#1B1C1A] border border-stone-200"
-                type="button"
-              >
-                <span className="font-display text-xl font-bold leading-none">5</span>
-                <span className="text-[10px] text-[#594139] font-bold tracking-widest mt-0.5 leading-none">
-                  JKL
-                </span>
-              </button>
-
-              {/* 6 */}
-              <button
-                onClick={() => handleNumClick('6')}
-                className="num-key h-[58px] rounded-xl bg-white shadow-sm flex flex-col items-center justify-center active:bg-[#EFEEEB] active:scale-95 transition-all text-[#1B1C1A] border border-stone-200"
-                type="button"
-              >
-                <span className="font-display text-xl font-bold leading-none">6</span>
-                <span className="text-[10px] text-[#594139] font-bold tracking-widest mt-0.5 leading-none">
-                  MNO
-                </span>
-              </button>
-
-              {/* 7 */}
-              <button
-                onClick={() => handleNumClick('7')}
-                className="num-key h-[58px] rounded-xl bg-white shadow-sm flex flex-col items-center justify-center active:bg-[#EFEEEB] active:scale-95 transition-all text-[#1B1C1A] border border-stone-200"
-                type="button"
-              >
-                <span className="font-display text-xl font-bold leading-none">7</span>
-                <span className="text-[10px] text-[#594139] font-bold tracking-widest mt-0.5 leading-none">
-                  PQRS
-                </span>
-              </button>
-
-              {/* 8 */}
-              <button
-                onClick={() => handleNumClick('8')}
-                className="num-key h-[58px] rounded-xl bg-white shadow-sm flex flex-col items-center justify-center active:bg-[#EFEEEB] active:scale-95 transition-all text-[#1B1C1A] border border-stone-200"
-                type="button"
-              >
-                <span className="font-display text-xl font-bold leading-none">8</span>
-                <span className="text-[10px] text-[#594139] font-bold tracking-widest mt-0.5 leading-none">
-                  TUV
-                </span>
-              </button>
-
-              {/* 9 */}
-              <button
-                onClick={() => handleNumClick('9')}
-                className="num-key h-[58px] rounded-xl bg-white shadow-sm flex flex-col items-center justify-center active:bg-[#EFEEEB] active:scale-95 transition-all text-[#1B1C1A] border border-stone-200"
-                type="button"
-              >
-                <span className="font-display text-xl font-bold leading-none">9</span>
-                <span className="text-[10px] text-[#594139] font-bold tracking-widest mt-0.5 leading-none">
-                  WXYZ
-                </span>
-              </button>
-
-              {/* Bottom Row: Biometrics/Fingerprint Icon */}
-              <button
-                onClick={handleBioScan}
-                disabled={isBioScanning}
-                aria-label="Biometric Scan"
-                className="h-[58px] rounded-xl bg-[#EAE8E5] flex flex-col items-center justify-center active:bg-[#E4E2DF] active:scale-95 transition-all text-[#A73400] border border-stone-200"
-                type="button"
-                title="Biometric Fingerprint Authentication"
-              >
-                <span
-                  className={`material-symbols-outlined text-[26px] ${
-                    isBioScanning ? 'animate-pulse text-[#006B2C]' : ''
-                  }`}
-                >
-                  fingerprint
-                </span>
-                <span className="text-[9px] font-bold uppercase tracking-wider text-[#594139]">
-                  {isBioScanning ? 'Scanning...' : 'Bio Scan'}
-                </span>
-              </button>
-
-              {/* 0 */}
-              <button
-                onClick={() => handleNumClick('0')}
-                className="num-key h-[58px] rounded-xl bg-white shadow-sm flex flex-col items-center justify-center active:bg-[#EFEEEB] active:scale-95 transition-all text-[#1B1C1A] border border-stone-200"
-                type="button"
-              >
-                <span className="font-display text-xl font-bold leading-none">0</span>
-                <span className="text-[10px] text-[#594139] font-bold tracking-widest mt-0.5 leading-none">
-                  +
-                </span>
-              </button>
-
-              {/* Backspace / Delete */}
-              <button
-                onClick={handleBackspace}
-                aria-label="Backspace"
-                className="h-[58px] rounded-xl bg-[#EAE8E5] flex items-center justify-center active:bg-[#E4E2DF] active:scale-95 transition-all text-[#1B1C1A] border border-stone-200"
-                id="keypad-backspace"
-                type="button"
-              >
-                <span className="material-symbols-outlined text-[24px]">backspace</span>
-              </button>
             </div>
           </section>
 
