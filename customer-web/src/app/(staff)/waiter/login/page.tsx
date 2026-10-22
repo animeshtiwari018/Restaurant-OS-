@@ -77,7 +77,7 @@ export default function WaiterLoginPage() {
   const [selectedStaffId, setSelectedStaffId] = useState<string>('staff_rahul');
   const [pinDigits, setPinDigits] = useState<string>('');
   const [isInputFocused, setIsInputFocused] = useState(false);
-  const [showPin, setShowPin] = useState(false);
+  const [showPin, setShowPin] = useState(true);
   const pinInputRef = useRef<HTMLInputElement>(null);
   const [currentOutlet, setCurrentOutlet] = useState<string>(OUTLETS[0]);
   const [isOutletSwitchOpen, setIsOutletSwitchOpen] = useState(false);
@@ -549,20 +549,19 @@ export default function WaiterLoginPage() {
               </div>
             )}
 
-            {/* Separate Modern PIN Boxes */}
-            <div className="w-full bg-white rounded-2xl p-5 shadow-sm flex flex-col items-center border border-stone-200">
-              <p className="font-display font-semibold text-sm text-[#1B1C1A] text-center mb-1">
-                Enter 4-Digit PIN for{' '}
-                <span className="text-[#A73400] font-bold">{activeStaff.name}</span>
-              </p>
-              <p className="text-xs text-[#594139] mb-4 text-center">
-                Default PIN: <span className="font-mono font-bold text-[#A73400]">1234</span>
+            {/* Separate Modern PIN Boxes (matching reference design in warm terracotta theme) */}
+            <div className="w-full bg-white rounded-2xl p-6 shadow-sm flex flex-col items-center border border-stone-200">
+              <h2 className="font-display font-bold text-base text-[#1B1C1A] text-center">
+                Enter Security PIN
+              </h2>
+              <p className="text-xs text-[#594139] mt-0.5 mb-5 text-center">
+                Terminal access for <span className="text-[#A73400] font-bold">{activeStaff.name}</span> • Default: <span className="font-mono font-bold text-[#A73400]">1234</span>
               </p>
 
-              {/* 4 Separate Styled PIN Boxes (Box 1, Box 2, Box 3, Box 4) */}
+              {/* 4 Clean Reference-style Separate Boxes */}
               <div
                 onClick={() => pinInputRef.current?.focus()}
-                className="relative flex items-center justify-center gap-3 my-2 cursor-pointer select-none"
+                className="relative flex items-center justify-center gap-3.5 my-2 cursor-pointer select-none"
               >
                 {/* Invisible input capturing native mobile & desktop input */}
                 <input
@@ -598,12 +597,12 @@ export default function WaiterLoginPage() {
                   return (
                     <div
                       key={idx}
-                      className={`w-14 h-16 sm:w-16 sm:h-18 rounded-2xl flex items-center justify-center font-mono text-2xl font-extrabold transition-all duration-150 border-2 ${
+                      className={`w-14 h-16 sm:w-15 sm:h-17 rounded-xl flex items-center justify-center font-display text-2xl font-bold transition-all border-2 ${
                         isActive
-                          ? 'border-[#A73400] bg-white ring-4 ring-[#A73400]/15 scale-105 shadow-md text-[#A73400]'
+                          ? 'border-[#A73400] bg-white ring-4 ring-[#A73400]/15 shadow-sm text-[#A73400]'
                           : isFilled
-                          ? 'border-[#A73400]/60 bg-white text-[#1B1C1A] shadow-xs'
-                          : 'border-stone-200 bg-[#FAF8F5] text-stone-300'
+                          ? 'border-[#A73400] bg-white text-[#1B1C1A] shadow-xs'
+                          : 'border-stone-300 bg-white text-stone-400'
                       }`}
                     >
                       {isFilled ? (
@@ -614,11 +613,7 @@ export default function WaiterLoginPage() {
                         )
                       ) : isActive ? (
                         <span className="w-0.5 h-6 bg-[#A73400] animate-pulse rounded-full" />
-                      ) : (
-                        <span className="text-xs text-stone-300 font-mono font-medium">
-                          {idx + 1}
-                        </span>
-                      )}
+                      ) : null}
                     </div>
                   );
                 })}
